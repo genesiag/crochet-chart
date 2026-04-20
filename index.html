@@ -1,445 +1,345 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Crochet Chart</title>
-  <style>
-    :root {
-      --bg:         #F5F5F7;
-      --surface:    #FFFFFF;
-      --surface-2:  #F5F5F7;
-      --accent:     #0071E3;
-      --accent-l:   #E3EEFB;
-      --text:       #1D1D1F;
-      --text-2:     #6E6E73;
-      --text-3:     #AEAEB2;
-      --border:     rgba(0,0,0,.08);
-      --border-2:   rgba(0,0,0,.14);
-      --grid-b:     #D1D1D6;
-      --filled:     #1D1D1F;
-      --cur-l:      #FFF3CC;
-      --cur:        #FF9F0A;
-      --done-l:     #D4EDDA;
-      --done:       #34C759;
-      --void-bg:    #EBEBED;
-      --r:          12px;
-      --rs:         8px;
-      --hh:         52px;  /* header height */
-      --th:         44px;  /* tabs height */
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Crochet Chart</title>
+<style>
+:root {
+  --bg:       #F5F5F7;
+  --surface:  #FFFFFF;
+  --sf2:      #F5F5F7;
+  --accent:   #0071E3;
+  --accent-l: #E3EEFB;
+  --text:     #1D1D1F;
+  --text2:    #6E6E73;
+  --text3:    #AEAEB2;
+  --border:   rgba(0,0,0,.08);
+  --border2:  rgba(0,0,0,.14);
+  --gridb:    #D1D1D6;
+  --filled:   #1D1D1F;
+  --cur-l:    #FFF3CC;
+  --cur:      #FF9F0A;
+  --done-l:   #D4EDDA;
+  --done:     #34C759;
+  --r:        12px;
+  --rs:       8px;
+  --hh:       52px;
+  --th:       44px;
+  --sbw:      272px; /* sidebar width */
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* ── HEADER ── */
+#hdr{
+  position:fixed;top:0;left:0;right:0;height:var(--hh);
+  background:rgba(245,245,247,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid var(--border2);
+  display:flex;align-items:center;padding:0 14px;gap:10px;z-index:60;
+}
+.hdr-menu{background:none;border:none;cursor:pointer;color:var(--text2);padding:4px;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:background .15s}
+.hdr-menu:active{background:var(--sf2)}
+.logo{font-size:17px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.hdr-proj{font-size:14px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;cursor:pointer}
+.hdr-proj b{color:var(--text);font-weight:500}
+.hdr-proj:active{opacity:.6}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.hdr-row{font-size:13px;font-weight:500;color:var(--text2);background:var(--sf2);border-radius:99px;padding:4px 10px;white-space:nowrap;display:none}
+.hdr-row.on{display:block}
+.hdr-row b{color:var(--text)}
+.hdr-btn{background:var(--sf2);border:none;color:var(--accent);font-family:inherit;font-size:13px;font-weight:500;padding:6px 12px;border-radius:99px;cursor:pointer;white-space:nowrap}
+.hdr-btn:active{opacity:.6}
 
-    html, body {
-      height: 100%;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      font-size: 15px;
-      -webkit-font-smoothing: antialiased;
-    }
+/* ── SIDEBAR BACKDROP ── */
+#sb-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:55;display:none;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#sb-backdrop.on{display:block}
 
-    /* ── STICKY HEADER ── */
-    #app-header {
-      position: fixed; top: 0; left: 0; right: 0;
-      height: var(--hh);
-      background: rgba(245,245,247,.92);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
-      border-bottom: .5px solid var(--border-2);
-      display: flex; align-items: center;
-      padding: 0 16px;
-      gap: 12px;
-      z-index: 50;
-    }
-    .logo { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
-    .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+/* ── SIDEBAR ── */
+#sidebar{
+  position:fixed;top:0;left:0;width:var(--sbw);height:100%;
+  background:var(--surface);
+  border-right:.5px solid var(--border2);
+  z-index:58;
+  display:flex;flex-direction:column;
+  transform:translateX(calc(-1 * var(--sbw)));
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  box-shadow:4px 0 24px rgba(0,0,0,.08);
+}
+#sidebar.open{transform:translateX(0)}
 
-    /* row badge in header — only visible in work mode */
-    .hdr-row-badge {
-      font-size: 14px; font-weight: 500; color: var(--text-2);
-      background: var(--surface-2); border-radius: 99px;
-      padding: 4px 12px; white-space: nowrap;
-      display: none;
-    }
-    .hdr-row-badge.visible { display: block; }
-    .hdr-row-badge b { color: var(--text); }
+.sb-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 14px 12px;
+  border-bottom:.5px solid var(--border);
+  flex-shrink:0;
+  padding-top:calc(14px + env(safe-area-inset-top));
+}
+.sb-logo{font-size:17px;font-weight:600;letter-spacing:-.01em;flex:1}
+.sb-close{background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;line-height:1;padding:2px 4px;border-radius:6px}
+.sb-close:active{background:var(--sf2)}
 
-    .hdr-btn {
-      background: var(--surface-2); border: none;
-      color: var(--accent); font-family: inherit; font-size: 13px; font-weight: 500;
-      padding: 6px 13px; border-radius: 99px; cursor: pointer;
-      transition: opacity .15s; white-space: nowrap;
-    }
-    .hdr-btn:active { opacity: .6; }
+.sb-new{
+  margin:12px;
+  background:var(--accent);color:#fff;border:none;border-radius:var(--r);
+  padding:12px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  transition:opacity .15s;flex-shrink:0;
+}
+.sb-new:active{opacity:.8}
 
-    /* ── STICKY TABS ── */
-    #app-tabs {
-      position: fixed; top: var(--hh); left: 0; right: 0;
-      height: var(--th);
-      background: rgba(245,245,247,.92);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
-      border-bottom: .5px solid var(--border-2);
-      display: flex; align-items: stretch;
-      padding: 0 8px;
-      z-index: 49;
-    }
-    .tab-btn {
-      background: none; border: none;
-      border-bottom: 2px solid transparent;
-      padding: 0 14px;
-      font-family: inherit; font-size: 14px; font-weight: 400;
-      color: var(--text-2); cursor: pointer;
-      white-space: nowrap;
-      transition: color .15s;
-      flex-shrink: 0;
-    }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+.sb-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 8px 20px}
+.sb-list::-webkit-scrollbar{display:none}
 
-    /* ── MAIN AREA ── */
-    #app-main {
-      position: fixed;
-      top: calc(var(--hh) + var(--th));
-      left: 0; right: 0; bottom: 0;
-      overflow: hidden;
-    }
+.sb-item{
+  border-radius:var(--rs);padding:11px 12px;
+  margin-bottom:4px;cursor:pointer;
+  position:relative;
+  border:.5px solid transparent;
+  transition:background .12s,border-color .12s;
+}
+.sb-item:hover{background:var(--sf2)}
+.sb-item.active{background:var(--accent-l);border-color:rgba(0,113,227,.25)}
+.sb-item-name{
+  font-size:14px;font-weight:500;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:3px;padding-right:28px;
+  line-height:1.3;
+}
+.sb-item-name input{
+  font-family:inherit;font-size:14px;font-weight:500;color:var(--text);
+  border:none;border-bottom:1.5px solid var(--accent);background:none;
+  outline:none;width:100%;padding:0;
+}
+.sb-item-meta{font-size:11px;color:var(--text2)}
+.sb-actions{position:absolute;top:50%;right:8px;transform:translateY(-50%);display:flex;gap:2px;opacity:0;transition:opacity .15s}
+.sb-item:hover .sb-actions,.sb-item.active .sb-actions{opacity:1}
+.sb-del,.sb-edit{background:none;border:none;cursor:pointer;color:var(--text2);padding:6px;border-radius:6px;display:flex;align-items:center}
+.sb-del:active{color:#E53935}
+.sb-edit:active{color:var(--accent)}
 
-    .panel { display: none; height: 100%; flex-direction: column; }
-    .panel.active { display: flex; }
+/* ── TABS ── */
+#tabs{
+  position:fixed;top:var(--hh);left:0;right:0;height:var(--th);
+  background:rgba(245,245,247,.92);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid var(--border2);
+  display:flex;align-items:stretch;padding:0 8px;z-index:50;
+}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:0 14px;font-family:inherit;font-size:14px;font-weight:400;color:var(--text2);cursor:pointer;white-space:nowrap;transition:color .15s;flex-shrink:0}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
 
-    /* ── SETTINGS PANEL (scrollable) ── */
-    #panel-setup { overflow-y: auto; padding: 16px; }
+/* ── MAIN ── */
+#main{position:fixed;top:calc(var(--hh) + var(--th));left:0;right:0;bottom:0;overflow:hidden}
+.panel{display:none;height:100%;flex-direction:column}
+.panel.active{display:flex}
 
-    .section-label {
-      font-size: 11px; font-weight: 600; color: var(--text-2);
-      letter-spacing: .06em; text-transform: uppercase;
-      padding: 4px 4px 6px; margin-top: 16px;
-    }
-    .section-label:first-child { margin-top: 0; }
-    .section-card {
-      background: var(--surface); border-radius: var(--r);
-      overflow: hidden; border: .5px solid var(--border);
-      margin-bottom: 4px;
-    }
-    .form-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 16px;
-      border-bottom: .5px solid var(--border);
-    }
-    .form-row:last-child { border-bottom: none; }
-    .form-row label { font-size: 15px; color: var(--text); flex: 1; }
-    .form-row input[type=number],
-    .form-row select {
-      background: var(--surface-2); border: .5px solid var(--border-2);
-      border-radius: var(--rs); padding: 7px 10px;
-      font-family: inherit; font-size: 15px; color: var(--text);
-      outline: none; -moz-appearance: textfield; appearance: none;
-    }
-    .form-row input[type=number] { width: 90px; text-align: right; }
-    .form-row select { width: 150px; }
-    input[type=number]::-webkit-outer-spin-button,
-    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .form-row input:focus, .form-row select:focus { border-color: var(--accent); }
+/* ── SETTINGS ── */
+#panel-setup{overflow-y:auto;padding:16px}
+.sec-label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding:4px 4px 6px;margin-top:16px}
+.sec-label:first-child{margin-top:0}
+.sec-card{background:var(--surface);border-radius:var(--r);overflow:hidden;border:.5px solid var(--border);margin-bottom:4px}
+.frow{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:.5px solid var(--border)}
+.frow:last-child{border-bottom:none}
+.frow label{font-size:15px;color:var(--text);flex:1}
+.frow input[type=number],.frow select{background:var(--sf2);border:.5px solid var(--border2);border-radius:var(--rs);padding:7px 10px;font-family:inherit;font-size:15px;color:var(--text);outline:none;-moz-appearance:textfield;appearance:none}
+.frow input[type=number]{width:90px;text-align:right}
+.frow select{width:150px}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.frow input:focus,.frow select:focus{border-color:var(--accent)}
+.info-banner{background:var(--surface);border-radius:var(--r);padding:12px 16px;font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:4px;border:.5px solid var(--border)}
+.info-banner b{color:var(--text);font-weight:500}
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:var(--r);padding:14px 22px;font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;width:100%;margin-top:12px;transition:opacity .15s}
+.btn-primary:active{opacity:.8}
+details.gi{margin-top:4px;margin-bottom:4px}
+details.gi summary{list-style:none;display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);font-size:15px;font-weight:500;color:var(--accent);cursor:pointer;-webkit-user-select:none;user-select:none}
+details.gi summary::-webkit-details-marker{display:none}
+details.gi[open] summary{border-radius:var(--r) var(--r) 0 0;border-bottom:.5px solid var(--border)}
+.gi-body{background:var(--surface);border:.5px solid var(--border);border-top:none;border-radius:0 0 var(--r) var(--r);overflow:hidden}
+.gi-step{padding:13px 16px;border-bottom:.5px solid var(--border);font-size:14px;line-height:1.7;color:var(--text2)}
+.gi-step:last-child{border-bottom:none}
+.gi-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.step-n{width:20px;height:20px;background:var(--accent);color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.gi-step b{color:var(--text);font-weight:500}
 
-    .info-banner {
-      background: var(--surface); border-radius: var(--r);
-      padding: 12px 16px; font-size: 14px; color: var(--text-2);
-      line-height: 1.8; margin-bottom: 4px; border: .5px solid var(--border);
-    }
-    .info-banner b { color: var(--text); font-weight: 500; }
+/* ── TOOLBAR ── */
+.toolbar{display:flex;align-items:center;gap:6px;flex-shrink:0;padding:8px 10px;background:var(--surface);border-bottom:.5px solid var(--border);flex-wrap:wrap}
+.tbtn{display:flex;align-items:center;gap:5px;padding:6px 11px;height:34px;border:.5px solid var(--border2);border-radius:var(--rs);background:var(--sf2);font-family:inherit;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .12s}
+.tbtn.active{background:var(--accent-l);border-color:var(--accent);color:var(--accent)}
+.tbtn:active:not(.active){opacity:.7}
+.t-dot{width:13px;height:13px;border-radius:3px;background:var(--filled);flex-shrink:0}
+.t-empty{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0}
+.t-void{width:13px;height:13px;border-radius:3px;flex-shrink:0;background:repeating-linear-gradient(45deg,#C8C8CC 0,#C8C8CC 1.5px,#EBEBED 1.5px,#EBEBED 4px)}
+.t-sep{width:.5px;height:22px;background:var(--border2);margin:0 2px;flex-shrink:0}
+.pan-btn{display:flex;align-items:center;gap:5px;padding:6px 11px;height:34px;border:.5px solid var(--border2);border-radius:var(--rs);background:var(--sf2);font-family:inherit;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .12s}
+.pan-btn.active{background:#FFF3CC;border-color:var(--cur);color:#8A4800}
+.gc-inp{display:flex;align-items:center;gap:5px;margin-left:auto;font-size:13px;color:var(--text2)}
+.gc-inp input[type=number]{width:52px;padding:5px 7px;font-size:13px;text-align:center;background:var(--sf2);border:.5px solid var(--border2);border-radius:var(--rs);font-family:inherit;color:var(--text);-moz-appearance:textfield;appearance:none}
+.gc-inp input::-webkit-outer-spin-button,.gc-inp input::-webkit-inner-spin-button{-webkit-appearance:none}
+.btn-sec{background:none;border:.5px solid var(--border2);border-radius:var(--rs);padding:6px 11px;font-family:inherit;font-size:13px;color:var(--text2);cursor:pointer;height:34px;white-space:nowrap}
+.btn-sec:active{opacity:.6}
 
-    .btn-primary {
-      background: var(--accent); color: #fff; border: none;
-      border-radius: var(--r); padding: 14px 22px;
-      font-family: inherit; font-size: 15px; font-weight: 500;
-      cursor: pointer; width: 100%; margin-top: 12px;
-      transition: opacity .15s;
-    }
-    .btn-primary:active { opacity: .8; }
+/* ── GRID ── */
+.grid-area{flex:1;overflow:hidden;position:relative}
+.grid-wrap{position:absolute;inset:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.grid-wrap.edit-mode{touch-action:none;cursor:crosshair}
+.grid-wrap.pan-mode{touch-action:pan-x pan-y;cursor:grab}
+.grid-wrap.pan-mode:active{cursor:grabbing}
+table.cg{border-collapse:collapse;width:max-content;background:var(--surface)}
+td.gc{width:28px;height:28px;border:.5px solid var(--gridb);padding:0;vertical-align:middle;text-align:center}
+td.gc.filled{background:var(--filled)}
+td.gc.void{background:repeating-linear-gradient(45deg,#D8D8DC 0,#D8D8DC 2px,#EBEBED 2px,#EBEBED 6px)!important}
+td.rn{width:24px;border:none!important;padding:0 3px 0 6px;cursor:default;text-align:right}
+td.rn span{font-size:9px;color:var(--text3);line-height:28px;display:block}
+td.cn{width:28px;height:18px;border:none!important;text-align:center;cursor:default}
+td.cn span{font-size:9px;color:var(--text3)}
+td.gc.cro-cur{background:var(--cur-l)!important;cursor:pointer}
+td.gc.cro-done{background:var(--done-l)!important}
+td.gc.cro-fut{opacity:.18;pointer-events:none}
+td.gc.cro-cur.filled{background:var(--filled)!important}
+td.gc.cro-done.filled{background:var(--filled)!important}
+td.gc.cro-cur.void,td.gc.cro-done.void{opacity:.5}
 
-    details.gauge-info { margin-top: 4px; margin-bottom: 4px; }
-    details.gauge-info summary {
-      list-style: none; display: flex; align-items: center; gap: 8px;
-      padding: 12px 16px; background: var(--surface); border: .5px solid var(--border);
-      border-radius: var(--r); font-size: 15px; font-weight: 500; color: var(--accent);
-      cursor: pointer; -webkit-user-select: none; user-select: none;
-    }
-    details.gauge-info summary::-webkit-details-marker { display: none; }
-    details.gauge-info[open] summary { border-radius: var(--r) var(--r) 0 0; border-bottom: .5px solid var(--border); }
-    .gauge-body { background: var(--surface); border: .5px solid var(--border); border-top: none; border-radius: 0 0 var(--r) var(--r); overflow: hidden; }
-    .gauge-step { padding: 13px 16px; border-bottom: .5px solid var(--border); font-size: 14px; line-height: 1.7; color: var(--text-2); }
-    .gauge-step:last-child { border-bottom: none; }
-    .gauge-step-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 7px; }
-    .step-num { width: 20px; height: 20px; background: var(--accent); color: #fff; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .gauge-step b { color: var(--text); font-weight: 500; }
+/* ── CROCHET BAR ── */
+.cro-bar{display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;padding:10px 12px;background:var(--surface);border-bottom:.5px solid var(--border)}
+.row-badge{font-size:16px;font-weight:600;color:var(--text)}
+.row-badge .tot{font-size:13px;font-weight:400;color:var(--text2)}
+.prog-wrap{flex:1;min-width:80px;display:flex;align-items:center;gap:8px}
+.prog-track{flex:1;height:5px;background:var(--border2);border-radius:999px;overflow:hidden}
+.prog-fill{height:100%;background:var(--done);border-radius:999px;transition:width .3s}
+.prog-lbl{font-size:13px;font-weight:500;color:var(--done);min-width:32px;text-align:right}
+.nav-btn{background:var(--sf2);border:.5px solid var(--border2);border-radius:var(--rs);padding:7px 13px;font-family:inherit;font-size:14px;color:var(--text2);cursor:pointer;height:36px}
+.nav-btn:active{opacity:.6}
+.rst-btn{background:none;border:none;font-family:inherit;font-size:13px;color:var(--text3);cursor:pointer}
 
-    /* ── TOOLBAR ── */
-    .toolbar {
-      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-      padding: 8px 12px;
-      background: var(--surface);
-      border-bottom: .5px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .tool-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 12px; height: 34px;
-      border: .5px solid var(--border-2); border-radius: var(--rs);
-      background: var(--surface-2); font-family: inherit; font-size: 13px; font-weight: 500;
-      color: var(--text-2); cursor: pointer; white-space: nowrap; transition: all .12s;
-    }
-    .tool-btn.active { background: var(--accent-l); border-color: var(--accent); color: var(--accent); }
-    .tool-btn:active:not(.active) { opacity: .7; }
-    .tool-dot   { width: 13px; height: 13px; border-radius: 3px; background: var(--filled); flex-shrink: 0; }
-    .tool-empty { width: 13px; height: 13px; border-radius: 3px; border: 1.5px solid var(--border-2); flex-shrink: 0; }
-    .tool-void  { width: 13px; height: 13px; border-radius: 3px; flex-shrink: 0;
-      background: repeating-linear-gradient(45deg, #C8C8CC 0, #C8C8CC 1.5px, #EBEBED 1.5px, #EBEBED 4px); }
+/* ── MINIMAP ── */
+.mm-wrap{position:absolute;bottom:14px;right:14px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:.5px solid var(--border2);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.14);z-index:20;display:none;overflow:hidden;touch-action:none;user-select:none}
+.mm-wrap.visible{display:block}
+.mm-hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 8px 5px;cursor:grab;border-bottom:.5px solid var(--border)}
+.mm-hdr:active{cursor:grabbing}
+.mm-title{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
+.mm-hide{background:none;border:none;cursor:pointer;font-size:15px;color:var(--text3);line-height:1;padding:0 2px}
+.mm-hide:active{opacity:.5}
+.mm-cvs-wrap{padding:5px;cursor:crosshair}
+.mm-cvs{display:block;border-radius:5px}
+.mm-restore{position:absolute;bottom:14px;right:14px;width:36px;height:36px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:.5px solid var(--border2);border-radius:9px;box-shadow:0 2px 8px rgba(0,0,0,.12);z-index:20;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:17px;color:var(--text2)}
+.mm-restore.visible{display:flex}
 
-    /* Pan mode toggle */
-    .mode-sep { width: .5px; height: 22px; background: var(--border-2); margin: 0 2px; flex-shrink: 0; }
-    .pan-btn {
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 12px; height: 34px;
-      border: .5px solid var(--border-2); border-radius: var(--rs);
-      background: var(--surface-2); font-family: inherit; font-size: 13px; font-weight: 500;
-      color: var(--text-2); cursor: pointer; white-space: nowrap; transition: all .12s;
-    }
-    .pan-btn.active { background: #FFF3CC; border-color: var(--cur); color: #A05000; }
+/* ── TOAST ── */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:rgba(29,29,31,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;padding:9px 18px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .25s,transform .25s;z-index:999;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    /* grid size inputs in toolbar */
-    .gc-inp {
-      display: flex; align-items: center; gap: 5px;
-      margin-left: auto; font-size: 13px; color: var(--text-2);
-    }
-    .gc-inp input[type=number] {
-      width: 52px; padding: 5px 8px; font-size: 13px; text-align: center;
-      background: var(--surface-2); border: .5px solid var(--border-2);
-      border-radius: var(--rs); font-family: inherit; color: var(--text);
-      -moz-appearance: textfield; appearance: none;
-    }
-    .gc-inp input::-webkit-outer-spin-button,
-    .gc-inp input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .btn-sec {
-      background: none; border: .5px solid var(--border-2); border-radius: var(--rs);
-      padding: 6px 12px; font-family: inherit; font-size: 13px; color: var(--text-2);
-      cursor: pointer; height: 34px; white-space: nowrap;
-    }
-    .btn-sec:active { opacity: .6; }
-
-    /* ── GRID WRAPPER ── */
-    .grid-area {
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-    }
-    .grid-wrap {
-      position: absolute; inset: 0;
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    /* In pan mode, allow native scroll on touch */
-    .grid-wrap.pan-mode { touch-action: pan-x pan-y; cursor: grab; }
-    .grid-wrap.edit-mode { touch-action: none; cursor: crosshair; }
-    .grid-wrap.pan-mode:active { cursor: grabbing; }
-
-    table.cg { border-collapse: collapse; width: max-content; background: var(--surface); }
-    td.gc { width: 28px; height: 28px; border: .5px solid var(--grid-b); padding: 0; vertical-align: middle; text-align: center; }
-    td.gc.filled { background: var(--filled); }
-    td.gc.void   {
-      background: repeating-linear-gradient(45deg, #D8D8DC 0, #D8D8DC 2px, #EBEBED 2px, #EBEBED 6px) !important;
-    }
-    td.rn  { width: 24px; border: none !important; padding: 0 3px 0 6px; cursor: default; text-align: right; }
-    td.rn span { font-size: 9px; color: var(--text-3); line-height: 28px; display: block; }
-    td.cn  { width: 28px; height: 18px; border: none !important; text-align: center; cursor: default; }
-    td.cn span { font-size: 9px; color: var(--text-3); }
-
-    /* crochet cell states */
-    td.gc.cro-cur  { background: var(--cur-l) !important; cursor: pointer; }
-    td.gc.cro-done { background: var(--done-l) !important; }
-    td.gc.cro-fut  { opacity: .18; pointer-events: none; }
-    td.gc.cro-cur.filled  { background: var(--filled) !important; box-shadow: inset 0 0 0 3px var(--cur); }
-    td.gc.cro-done.filled { background: var(--filled) !important; }
-    td.gc.cro-cur.void, td.gc.cro-done.void { opacity: .5; }
-
-    /* ── CROCHET HEADER ── */
-    .cro-bar {
-      display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap;
-      padding: 10px 14px; background: var(--surface); border-bottom: .5px solid var(--border);
-    }
-    .row-badge { font-size: 16px; font-weight: 600; color: var(--text); }
-    .row-badge .tot { font-size: 13px; font-weight: 400; color: var(--text-2); }
-    .prog-wrap { flex: 1; min-width: 80px; display: flex; align-items: center; gap: 8px; }
-    .prog-track { flex: 1; height: 5px; background: var(--border-2); border-radius: 999px; overflow: hidden; }
-    .prog-fill  { height: 100%; background: var(--done); border-radius: 999px; transition: width .3s; }
-    .prog-lbl   { font-size: 13px; font-weight: 500; color: var(--done); min-width: 32px; text-align: right; }
-    .nav-btn {
-      background: var(--surface-2); border: .5px solid var(--border-2); border-radius: var(--rs);
-      padding: 7px 14px; font-family: inherit; font-size: 14px; color: var(--text-2); cursor: pointer; height: 36px;
-    }
-    .nav-btn:active { opacity: .6; }
-    .rst-btn { background: none; border: none; font-family: inherit; font-size: 13px; color: var(--text-3); cursor: pointer; }
-
-    /* ── MINIMAP ── */
-    #minimap-wrap {
-      position: absolute;
-      bottom: 12px; right: 12px;
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-      border: .5px solid var(--border-2);
-      border-radius: 8px;
-      padding: 4px;
-      box-shadow: 0 2px 12px rgba(0,0,0,.12);
-      z-index: 20;
-      display: none;
-      cursor: pointer;
-    }
-    #minimap-wrap.visible { display: block; }
-    #minimap { display: block; border-radius: 5px; }
-
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 20px; left: 50%;
-      transform: translateX(-50%) translateY(16px);
-      background: rgba(29,29,31,.88);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      color: #fff; padding: 9px 18px; border-radius: 99px; font-size: 14px;
-      opacity: 0; transition: opacity .25s, transform .25s;
-      z-index: 999; pointer-events: none; white-space: nowrap;
-    }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  </style>
+@media(max-width:480px){
+  #panel-setup{padding:12px}
+  .toolbar{gap:4px;padding:6px 8px}
+}
+</style>
 </head>
 <body>
 
-<!-- FIXED HEADER -->
-<div id="app-header">
+<!-- SIDEBAR BACKDROP -->
+<div id="sb-backdrop" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">Crochet Chart</div>
+    <button class="sb-close" onclick="closeSidebar()">×</button>
+  </div>
+  <button class="sb-new" onclick="newProject()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    New pattern
+  </button>
+  <div class="sb-list" id="sb-list"></div>
+</div>
+
+<!-- HEADER -->
+<div id="hdr">
+  <button class="hdr-menu" onclick="toggleSidebar()" title="Projects">
+    <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><line x1="1" y1="1" x2="17" y2="1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="1" y1="7" x2="17" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="1" y1="13" x2="17" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  </button>
   <div class="logo">Crochet Chart</div>
+  <div class="hdr-proj" id="hdr-proj" onclick="renameFromHeader()" title="Tap to rename"></div>
   <div class="hdr-right">
-    <div class="hdr-row-badge" id="hdr-row-badge">Row <b id="hdr-cur">1</b> / <span id="hdr-tot">20</span></div>
+    <div class="hdr-row" id="hdr-row">Row <b id="hdr-cur">1</b> / <span id="hdr-tot">20</span></div>
     <button class="hdr-btn" onclick="exportPNG()">Export PNG</button>
   </div>
 </div>
 
-<!-- FIXED TABS -->
-<div id="app-tabs">
-  <button class="tab-btn active" onclick="switchTab('setup')">Settings</button>
-  <button class="tab-btn" onclick="switchTab('pattern')">Pattern</button>
-  <button class="tab-btn" onclick="switchTab('crochet')">Work Mode</button>
+<!-- TABS -->
+<div id="tabs">
+  <button class="tab active" onclick="switchTab('setup')">Settings</button>
+  <button class="tab" onclick="switchTab('pattern')">Pattern</button>
+  <button class="tab" onclick="switchTab('crochet')">Work Mode</button>
 </div>
 
 <!-- MAIN -->
-<div id="app-main">
+<div id="main">
 
   <!-- SETTINGS -->
   <div class="panel active" id="panel-setup">
-    <div class="section-label">Yarn &amp; Hook</div>
-    <div class="section-card">
-      <div class="form-row">
-        <label>Yarn weight</label>
+    <div class="sec-label">Yarn &amp; Hook</div>
+    <div class="sec-card">
+      <div class="frow"><label>Yarn weight</label>
         <select id="yw" onchange="calcSettings()">
-          <option value="lace">Thread / Lace</option>
-          <option value="fingering">Extra Fine</option>
-          <option value="sport">Fine</option>
-          <option value="dk">Light</option>
-          <option value="worsted" selected>Medium</option>
-          <option value="bulky">Bulky</option>
+          <option value="lace">Thread / Lace</option><option value="fingering">Extra Fine</option>
+          <option value="sport">Fine</option><option value="dk">Light</option>
+          <option value="worsted" selected>Medium</option><option value="bulky">Bulky</option>
           <option value="superb">Extra Bulky</option>
         </select>
       </div>
-      <div class="form-row">
-        <label>Hook size (mm)</label>
-        <input type="number" id="hs" value="5" min=".5" max="25" step=".5" oninput="calcSettings()"/>
-      </div>
+      <div class="frow"><label>Hook size (mm)</label><input type="number" id="hs" value="5" min=".5" max="25" step=".5" oninput="calcSettings()"/></div>
     </div>
-
-    <div class="section-label">Gauge</div>
-    <div class="section-card">
-      <div class="form-row">
-        <label>Stitches per 10 cm</label>
-        <input type="number" id="gst" value="16" min="1" max="80" oninput="calcSettings()"/>
-      </div>
-      <div class="form-row">
-        <label>Rows per 10 cm</label>
-        <input type="number" id="grw" value="18" min="1" max="80" oninput="calcSettings()"/>
-      </div>
+    <div class="sec-label">Gauge</div>
+    <div class="sec-card">
+      <div class="frow"><label>Stitches per 10 cm</label><input type="number" id="gst" value="16" min="1" max="80" oninput="calcSettings()"/></div>
+      <div class="frow"><label>Rows per 10 cm</label><input type="number" id="grw" value="18" min="1" max="80" oninput="calcSettings()"/></div>
     </div>
-
-    <details class="gauge-info">
+    <details class="gi">
       <summary>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0">
-          <circle cx="8" cy="8" r="7.25" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="8" y1="7" x2="8" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="8" cy="4.5" r=".9" fill="currentColor"/>
-        </svg>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><circle cx="8" cy="8" r="7.25" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="7" x2="8" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.5" r=".9" fill="currentColor"/></svg>
         How to make, block &amp; measure your gauge
       </summary>
-      <div class="gauge-body">
-        <div class="gauge-step">
-          <div class="gauge-step-title"><div class="step-num">1</div> Make the swatch in filet stitch</div>
-          Crochet a swatch at least <b>20 × 20 cm</b> using <b>your actual yarn and hook</b>. Work in filet mesh: <b>1 double crochet, chain 2</b> for open squares, or <b>3 double crochet</b> for filled squares. Do not use single crochet — filet gauge is completely different.
-        </div>
-        <div class="gauge-step">
-          <div class="gauge-step-title"><div class="step-num">2</div> Block it</div>
-          Wet blocking is essential for filet — the chain spaces are unstable until blocked and can shrink 10–20%. Lightly wet the swatch, lay it flat on a foam mat, pin the corners first, then stretch to a square and pin every 2–3 cm along the edges. Let it dry <b>completely overnight</b> before removing pins.
-        </div>
-        <div class="gauge-step">
-          <div class="gauge-step-title"><div class="step-num">3</div> Measure once dry</div>
-          Lay a ruler flat on the swatch. Count how many <b>filet squares</b> fit in 10 cm horizontally (each square = 1 DC + its space) → <b>Stitches per 10 cm</b>. Count rows vertically → <b>Rows per 10 cm</b>. Measure in the centre of the swatch.
-        </div>
-        <div class="gauge-step" style="font-size:13px;color:var(--text-3)">
-          Your yarn label may include a reference gauge — useful starting point, but your own blocked swatch is always more accurate.
-        </div>
+      <div class="gi-body">
+        <div class="gi-step"><div class="gi-title"><div class="step-n">1</div>Make the swatch in filet stitch</div>Crochet a swatch at least <b>20 × 20 cm</b> using <b>your actual yarn and hook</b>. Work in filet mesh: <b>1 double crochet, chain 2</b> for open squares, or <b>3 double crochet</b> for filled squares. Do not use single crochet — filet gauge is completely different.</div>
+        <div class="gi-step"><div class="gi-title"><div class="step-n">2</div>Block it</div>Wet blocking is essential for filet — the chain spaces shrink 10–20% unblocked. Lightly wet the swatch, lay flat on a foam mat, pin the corners, stretch to a square and pin every 2–3 cm. Let it dry <b>completely overnight</b> before removing pins.</div>
+        <div class="gi-step"><div class="gi-title"><div class="step-n">3</div>Measure once dry</div>Count how many <b>filet squares</b> fit in 10 cm horizontally (each square = 1 DC + its space) → <b>Stitches per 10 cm</b>. Count rows vertically → <b>Rows per 10 cm</b>. Measure in the centre of the swatch.</div>
+        <div class="gi-step" style="font-size:13px;color:var(--text3)">Your yarn label may include a reference gauge — useful starting point, but your own blocked swatch is always more accurate.</div>
       </div>
     </details>
-
-    <div class="section-label">Project size</div>
-    <div class="section-card">
-      <div class="form-row">
-        <label>Width (cm)</label>
-        <input type="number" id="pw" value="20" min="1" max="300" oninput="calcSettings()"/>
-      </div>
-      <div class="form-row">
-        <label>Height (cm)</label>
-        <input type="number" id="ph" value="20" min="1" max="300" oninput="calcSettings()"/>
-      </div>
+    <div class="sec-label">Project size</div>
+    <div class="sec-card">
+      <div class="frow"><label>Width (cm)</label><input type="number" id="pw" value="20" min="1" max="300" oninput="calcSettings()"/></div>
+      <div class="frow"><label>Height (cm)</label><input type="number" id="ph" value="20" min="1" max="300" oninput="calcSettings()"/></div>
     </div>
-
     <div class="info-banner" id="info-proj"></div>
-    <button class="btn-primary" onclick="applyFromSettings(); switchTab('pattern')">Create grid →</button>
-    <div style="height:20px"></div>
+    <button class="btn-primary" onclick="applyFromSettings();switchTab('pattern')">Create grid →</button>
+    <div style="height:24px"></div>
   </div>
 
   <!-- PATTERN -->
   <div class="panel" id="panel-pattern">
     <div class="toolbar">
-      <button class="tool-btn active" id="btn-fill"  onclick="setTool('fill')"><div class="tool-dot"></div> Fill</button>
-      <button class="tool-btn"        id="btn-erase" onclick="setTool('erase')"><div class="tool-empty"></div> Erase</button>
-      <button class="tool-btn"        id="btn-void"  onclick="setTool('void')"><div class="tool-void"></div> No stitch</button>
-      <div class="mode-sep"></div>
+      <button class="tbtn active" id="btn-fill"  onclick="setTool('fill')"><div class="t-dot"></div>Fill</button>
+      <button class="tbtn"        id="btn-erase" onclick="setTool('erase')"><div class="t-empty"></div>Erase</button>
+      <button class="tbtn"        id="btn-void"  onclick="setTool('void')"><div class="t-void"></div>No stitch</button>
+      <div class="t-sep"></div>
       <button class="pan-btn" id="pan-toggle" onclick="togglePan()">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">
-          <path d="M5 1v5.5L3.5 5 2 6.5 5 9.5 8 12.5l1.5-1.5L8 9.5V8h1.5l1-1-1.5-1.5V4l-1-1H7V1H5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
-        </svg>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M5 1v5.5L3.5 5 2 6.5 5 9.5 8 12.5l1.5-1.5L8 9.5V8h1.5l1-1-1.5-1.5V4l-1-1H7V1H5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
         Pan
       </button>
       <div class="gc-inp">
-        <span>Cols</span>
-        <input type="number" id="gcols" value="20" min="2" max="100" onchange="resizeGrid()"/>
-        <span>Rows</span>
-        <input type="number" id="grows" value="20" min="1" max="80"  onchange="resizeGrid()"/>
+        <span>Cols</span><input type="number" id="gcols" value="20" min="2" max="100" onchange="resizeGrid()"/>
+        <span>Rows</span><input type="number" id="grows" value="20" min="1" max="80"  onchange="resizeGrid()"/>
         <button class="btn-sec" onclick="clearGrid()">Clear</button>
       </div>
     </div>
-    <div class="grid-area" id="pat-area">
-      <div class="grid-wrap edit-mode" id="pat-wrap">
-        <table class="cg" id="pat-grid"></table>
+    <div class="grid-area">
+      <div class="grid-wrap edit-mode" id="pat-wrap"><table class="cg" id="pat-grid"></table></div>
+      <div class="mm-wrap" id="pat-mm-wrap">
+        <div class="mm-hdr" id="pat-mm-drag"><span class="mm-title">Overview</span><button class="mm-hide" onclick="hideMap('pat')">−</button></div>
+        <div class="mm-cvs-wrap" onclick="minimapClick(event,'pat')"><canvas class="mm-cvs" id="pat-mm" width="180" height="135"></canvas></div>
       </div>
-      <div id="minimap-wrap" onclick="minimapClick(event)">
-        <canvas id="minimap" width="120" height="90"></canvas>
-      </div>
+      <button class="mm-restore" id="pat-mm-restore" onclick="showMap('pat')">⊞</button>
     </div>
   </div>
 
@@ -449,19 +349,16 @@
       <button class="nav-btn" onclick="prevRow()">← Prev</button>
       <div class="row-badge">Row <span id="cur-num">1</span><span class="tot" id="row-tot"> / 20</span></div>
       <button class="nav-btn" onclick="nextRow()">Next →</button>
-      <div class="prog-wrap">
-        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-        <span class="prog-lbl" id="prog-lbl">0%</span>
-      </div>
+      <div class="prog-wrap"><div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div><span class="prog-lbl" id="prog-lbl">0%</span></div>
       <button class="rst-btn" onclick="resetProgress()">Reset</button>
     </div>
-    <div class="grid-area" id="cro-area">
-      <div class="grid-wrap edit-mode" id="cro-wrap">
-        <table class="cg" id="cro-grid"></table>
+    <div class="grid-area">
+      <div class="grid-wrap edit-mode" id="cro-wrap"><table class="cg" id="cro-grid"></table></div>
+      <div class="mm-wrap" id="cro-mm-wrap">
+        <div class="mm-hdr" id="cro-mm-drag"><span class="mm-title">Overview</span><button class="mm-hide" onclick="hideMap('cro')">−</button></div>
+        <div class="mm-cvs-wrap" onclick="minimapClick(event,'cro')"><canvas class="mm-cvs" id="cro-mm" width="180" height="135"></canvas></div>
       </div>
-      <div id="cro-minimap-wrap" onclick="crominimapClick(event)" style="position:absolute;bottom:12px;right:12px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border:.5px solid rgba(0,0,0,.14);border-radius:8px;padding:4px;box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:20;display:none;cursor:pointer">
-        <canvas id="cro-minimap" width="120" height="90"></canvas>
-      </div>
+      <button class="mm-restore" id="cro-mm-restore" onclick="showMap('cro')">⊞</button>
     </div>
   </div>
 
@@ -470,420 +367,462 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const YARN = {
-  lace:     { h:'1.5–2.25', n:'Thread / Lace' },
-  fingering:{ h:'2.25–3.5', n:'Extra Fine' },
-  sport:    { h:'3.5–4.5',  n:'Fine' },
-  dk:       { h:'4.5–5.5',  n:'Light' },
-  worsted:  { h:'5.5–6.5',  n:'Medium' },
-  bulky:    { h:'6.5–9',    n:'Bulky' },
-  superb:   { h:'9+',       n:'Extra Bulky' },
-};
+/* ════ CONSTANTS ════ */
+const YARN={lace:{h:'1.5–2.25',n:'Thread/Lace'},fingering:{h:'2.25–3.5',n:'Extra Fine'},sport:{h:'3.5–4.5',n:'Fine'},dk:{h:'4.5–5.5',n:'Light'},worsted:{h:'5.5–6.5',n:'Medium'},bulky:{h:'6.5–9',n:'Bulky'},superb:{h:'9+',n:'Extra Bulky'}};
+const CELL=28, MM={W:180,H:135};
 
-const S = {
-  grid: [],          // null | true | 'void'
-  cols: 20, rows: 20,
-  tool: 'fill',
-  panMode: false,
-  crRow: 0,
-  checked: new Set(),
-};
+/* ════ PROJECT STORAGE ════ */
+function loadProjects(){try{return JSON.parse(localStorage.getItem('cc-projects')||'[]')}catch{return[]}}
+function saveProjects(list){try{localStorage.setItem('cc-projects',JSON.stringify(list))}catch{}}
 
-const CELL = 28; // px — fixed, always
-let isDown = false, dragAction = null;
-
-/* ════════ GRID INIT ════════ */
-function initGrid(c, r) {
-  S.cols = c; S.rows = r;
-  S.grid = Array.from({ length: r }, () => new Array(c).fill(null));
+function makeProject(name='New pattern'){
+  return{id:Date.now().toString(36)+Math.random().toString(36).slice(2),name,createdAt:Date.now(),updatedAt:Date.now(),cols:20,rows:20,grid:null,crRow:0,checked:[]};
 }
-function resizeGrid() {
-  const c = clamp(+v('gcols')||20, 2, 100), r = clamp(+v('grows')||20, 1, 80);
-  const og = S.grid, oc = S.cols, or = S.rows;
-  S.cols = c; S.rows = r;
-  S.grid = Array.from({ length: r }, (_, ri) =>
-    Array.from({ length: c }, (_, ci) => ri < or && ci < oc ? og[ri][ci] : null));
+function serGrid(grid){return grid.map(r=>r.map(c=>c===true?1:c==='void'?2:0))}
+function desGrid(data){return data.map(r=>r.map(c=>c===1?true:c===2?'void':null))}
+
+function saveCurrentProject(){
+  if(!S.projectId)return;
+  const list=loadProjects();
+  const idx=list.findIndex(p=>p.id===S.projectId);
+  if(idx<0)return;
+  list[idx]={...list[idx],updatedAt:Date.now(),cols:S.cols,rows:S.rows,grid:serGrid(S.grid),crRow:S.crRow,checked:[...S.checked]};
+  saveProjects(list);
+}
+
+function loadProject(p){
+  S.projectId=p.id;
+  S.projectName=p.name;
+  S.cols=p.cols||20;
+  S.rows=p.rows||20;
+  S.grid=p.grid?desGrid(p.grid):Array.from({length:S.rows},()=>new Array(S.cols).fill(null));
+  S.crRow=p.crRow||0;
+  S.checked=new Set(p.checked||[]);
+  set('gcols',S.cols);set('grows',S.rows);
   renderPatternGrid();
-}
-function clearGrid() {
-  if (!confirm('Clear the entire pattern?')) return;
-  S.grid = Array.from({ length: S.rows }, () => new Array(S.cols).fill(null));
-  renderPatternGrid();
-  showToast('Grid cleared');
+  updateHeaderProj();
+  renderSidebar();
 }
 
-/* ════════ PATTERN GRID ════════ */
-function renderPatternGrid() {
-  const t = document.getElementById('pat-grid');
-  let h = '<tr><td class="rn"></td>';
-  for (let c = 0; c < S.cols; c++) h += `<td class="cn"><span>${c+1}</span></td>`;
-  h += '</tr>';
-  for (let r = S.rows-1; r >= 0; r--) {
-    h += `<tr><td class="rn"><span>${r+1}</span></td>`;
-    for (let c = 0; c < S.cols; c++) {
-      const cell = S.grid[r][c];
-      h += `<td class="gc${cell===true?' filled':cell==='void'?' void':''}" data-r="${r}" data-c="${c}"></td>`;
-    }
-    h += '</tr>';
+/* ════ STATE ════ */
+const S={grid:[],cols:20,rows:20,tool:'fill',panMode:false,crRow:0,checked:new Set(),projectId:null,projectName:'New pattern'};
+let isDown=false,dragAction=null;
+
+/* ════ SIDEBAR ════ */
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  if(sb.classList.contains('open'))closeSidebar();
+  else openSidebar();
+}
+function openSidebar(){
+  renderSidebar();
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sb-backdrop').classList.add('on');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sb-backdrop').classList.remove('on');
+}
+
+function renderSidebar(){
+  const list=loadProjects();
+  const el=document.getElementById('sb-list');
+  if(!list.length){el.innerHTML='<div style="padding:16px;font-size:13px;color:var(--text3);text-align:center">No patterns yet.<br>Create your first one!</div>';return;}
+  el.innerHTML=list.slice().sort((a,b)=>b.updatedAt-a.updatedAt).map(p=>{
+    const active=p.id===S.projectId;
+    const date=new Date(p.createdAt).toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'});
+    return`<div class="sb-item${active?' active':''}" data-id="${p.id}" onclick="selectProject('${p.id}')">
+      <div class="sb-item-name" id="sbn-${p.id}" onclick="startRename('${p.id}',event)">${escHtml(p.name)}</div>
+      <div class="sb-item-meta">Started ${date}</div>
+      <div class="sb-actions">
+        <button class="sb-edit" onclick="startRename('${p.id}',event)" title="Rename">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 1.5l2.5 2.5L4 11.5H1.5V9L9 1.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="sb-del" onclick="deleteProject('${p.id}',event)" title="Delete">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5h10M5.5 3.5V2.5h3V3.5M6 6v4M8 6v4M3 3.5l.7 7.5h6.6L11 3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function selectProject(id){
+  saveCurrentProject();
+  const list=loadProjects();
+  const p=list.find(x=>x.id===id);
+  if(p){loadProject(p);closeSidebar();}
+}
+
+function newProject(){
+  saveCurrentProject();
+  const p=makeProject();
+  const list=loadProjects();
+  list.push(p);
+  saveProjects(list);
+  loadProject(p);
+  closeSidebar();
+  showToast('New pattern created');
+  // prompt rename immediately
+  setTimeout(()=>openSidebar(),100);
+  setTimeout(()=>startRename(p.id),320);
+}
+
+function deleteProject(id,e){
+  e.stopPropagation();
+  const list=loadProjects();
+  const p=list.find(x=>x.id===id);
+  if(!p)return;
+  if(!confirm(`Delete "${p.name}"? This cannot be undone.`))return;
+  const newList=list.filter(x=>x.id!==id);
+  saveProjects(newList);
+  if(S.projectId===id){
+    if(newList.length){loadProject(newList[newList.length-1]);}
+    else{S.projectId=null;S.projectName='';S.grid=Array.from({length:20},()=>new Array(20).fill(null));S.cols=20;S.rows=20;S.crRow=0;S.checked=new Set();renderPatternGrid();updateHeaderProj();}
   }
-  t.innerHTML = h;
+  renderSidebar();
+  showToast('Pattern deleted');
+}
+
+function renameFromHeader(){
+  if(!S.projectId)return;
+  openSidebar();
+  // wait for sidebar to render then trigger rename
+  setTimeout(()=>startRename(S.projectId),200);
+}
+
+function startRename(id,e){
+  if(e)e.stopPropagation();
+  const el=document.getElementById('sbn-'+id);
+  if(!el)return;
+  const list=loadProjects();
+  const p=list.find(x=>x.id===id);
+  if(!p)return;
+  const cur=p.name;
+  el.innerHTML=`<input value="${escHtml(cur)}" id="ren-inp-${id}" onclick="event.stopPropagation()"/>`;
+  const inp=document.getElementById('ren-inp-'+id);
+  inp.focus();inp.select();
+  const commit=()=>{
+    const val=inp.value.trim()||cur;
+    const l=loadProjects();const i=l.findIndex(x=>x.id===id);
+    if(i>=0){l[i].name=val;saveProjects(l);}
+    if(S.projectId===id){S.projectName=val;updateHeaderProj();}
+    renderSidebar();
+  };
+  inp.onblur=commit;
+  inp.onkeydown=e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value=cur;inp.blur();}};
+}
+
+function updateHeaderProj(){
+  const el=document.getElementById('hdr-proj');
+  el.innerHTML=S.projectName?`<b>${escHtml(S.projectName)}</b>`:'';
+}
+
+/* ════ GRID INIT ════ */
+function initGrid(c,r){S.cols=c;S.rows=r;S.grid=Array.from({length:r},()=>new Array(c).fill(null));}
+function resizeGrid(){
+  const c=clamp(+v('gcols')||20,2,100),r=clamp(+v('grows')||20,1,80);
+  const og=S.grid,oc=S.cols,or=S.rows;
+  S.cols=c;S.rows=r;
+  S.grid=Array.from({length:r},(_,ri)=>Array.from({length:c},(_,ci)=>ri<or&&ci<oc?og[ri][ci]:null));
+  renderPatternGrid();saveCurrentProject();
+}
+function clearGrid(){
+  if(!confirm('Clear the entire pattern?'))return;
+  S.grid=Array.from({length:S.rows},()=>new Array(S.cols).fill(null));
+  renderPatternGrid();saveCurrentProject();showToast('Grid cleared');
+}
+
+/* ════ PATTERN GRID ════ */
+function renderPatternGrid(){
+  const t=document.getElementById('pat-grid');
+  let h='<tr><td class="rn"></td>';
+  for(let c=0;c<S.cols;c++)h+=`<td class="cn"><span>${c+1}</span></td>`;
+  h+='</tr>';
+  for(let r=S.rows-1;r>=0;r--){
+    h+=`<tr><td class="rn"><span>${r+1}</span></td>`;
+    for(let c=0;c<S.cols;c++){const v=S.grid[r][c];h+=`<td class="gc${v===true?' filled':v==='void'?' void':''}" data-r="${r}" data-c="${c}"></td>`;}
+    h+='</tr>';
+  }
+  t.innerHTML=h;
   bindPattern();
   updateMinimap('pat');
 }
 
-function bindPattern() {
-  const wrap = document.getElementById('pat-wrap');
-  wrap.onmousedown = e => {
-    if (S.panMode) return;
-    isDown = true;
-    const td = e.target.closest('.gc[data-r]'); if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
+let saveTimer=null;
+function schedSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveCurrentProject,600);}
+
+function bindPattern(){
+  const wrap=document.getElementById('pat-wrap');
+  let tf=null, mpan=null;
+  wrap.onmousedown=e=>{
+    if(S.panMode){mpan={sl:wrap.scrollLeft,st:wrap.scrollTop,x:e.clientX,y:e.clientY};wrap.style.cursor='grabbing';return;}
+    isDown=true;const td=e.target.closest('.gc[data-r]');if(td)paintCell(+td.dataset.r,+td.dataset.c,td);
   };
-  wrap.onmousemove = e => {
-    if (S.panMode || !isDown) return;
-    const td = e.target.closest('.gc[data-r]'); if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
+  wrap.onmousemove=e=>{
+    if(S.panMode&&mpan){wrap.scrollLeft=mpan.sl-(e.clientX-mpan.x);wrap.scrollTop=mpan.st-(e.clientY-mpan.y);updateMinimap('pat');return;}
+    if(!isDown)return;const td=e.target.closest('.gc[data-r]');if(td)paintCell(+td.dataset.r,+td.dataset.c,td);
   };
-  wrap.ontouchstart = e => {
-    if (S.panMode) return;
-    e.preventDefault(); isDown = true; ptTouch(e.touches[0]);
+  wrap.onmouseup=()=>{if(S.panMode)wrap.style.cursor='grab';mpan=null;};
+  wrap.ontouchstart=e=>{
+    if(e.touches.length>=2){isDown=false;e.preventDefault();tf={sl:wrap.scrollLeft,st:wrap.scrollTop,mx:(e.touches[0].clientX+e.touches[1].clientX)/2,my:(e.touches[0].clientY+e.touches[1].clientY)/2};return;}
+    if(S.panMode)return; // let CSS touch-action handle native scroll
+    e.preventDefault();isDown=true;ptTouch(e.touches[0]);
   };
-  wrap.ontouchmove = e => {
-    if (S.panMode) return;
-    e.preventDefault(); if (isDown) ptTouch(e.touches[0]);
+  wrap.ontouchmove=e=>{
+    if(e.touches.length>=2&&tf){e.preventDefault();const mx=(e.touches[0].clientX+e.touches[1].clientX)/2,my=(e.touches[0].clientY+e.touches[1].clientY)/2;wrap.scrollLeft=tf.sl-(mx-tf.mx);wrap.scrollTop=tf.st-(my-tf.my);updateMinimap('pat');return;}
+    if(S.panMode)return; // native scroll handles it
+    e.preventDefault();if(!isDown)return;ptTouch(e.touches[0]);
   };
-  wrap.onscroll = () => updateMinimap('pat');
+  wrap.ontouchend=()=>{tf=null;};
+  wrap.onscroll=()=>updateMinimap('pat');
 }
 
-function ptTouch(touch) {
-  const td = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('#pat-grid .gc[data-r]');
-  if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
+function ptTouch(touch){const td=document.elementFromPoint(touch.clientX,touch.clientY)?.closest('#pat-grid .gc[data-r]');if(td)paintCell(+td.dataset.r,+td.dataset.c,td);}
+function paintCell(r,c,td){
+  if(S.tool==='erase'){S.grid[r][c]=null;td.className='gc';}
+  else if(S.tool==='fill'){S.grid[r][c]=true;td.className='gc filled';}
+  else{S.grid[r][c]='void';td.className='gc void';}
+  updateMinimap('pat');schedSave();
 }
 
-function paintCell(r, c, td) {
-  if (S.tool === 'erase')      { S.grid[r][c] = null;   td.className = 'gc'; }
-  else if (S.tool === 'fill')  { S.grid[r][c] = true;   td.className = 'gc filled'; }
-  else if (S.tool === 'void')  { S.grid[r][c] = 'void'; td.className = 'gc void'; }
-  updateMinimap('pat');
+function togglePan(){
+  S.panMode=!S.panMode;
+  const wrap=document.getElementById('pat-wrap');
+  wrap.classList.toggle('pan-mode',S.panMode);
+  wrap.classList.toggle('edit-mode',!S.panMode);
+  document.getElementById('pan-toggle').classList.toggle('active',S.panMode);
+  ['btn-fill','btn-erase','btn-void'].forEach(id=>document.getElementById(id).style.opacity=S.panMode?'.4':'1');
 }
 
-function togglePan() {
-  S.panMode = !S.panMode;
-  const wrap = document.getElementById('pat-wrap');
-  wrap.classList.toggle('pan-mode', S.panMode);
-  wrap.classList.toggle('edit-mode', !S.panMode);
-  document.getElementById('pan-toggle').classList.toggle('active', S.panMode);
-  // disable draw tools visually when panning
-  ['btn-fill','btn-erase','btn-void'].forEach(id =>
-    document.getElementById(id).style.opacity = S.panMode ? '.4' : '1'
-  );
+/* ════ CROCHET GRID ════ */
+function rowDir(r){return r%2===0?'ltr':'rtl';}
+function arrowSvg(dir){
+  const d=dir==='ltr'?'M3,8 L13,8 M9,4 L13,8 L9,12':'M13,8 L3,8 M7,4 L3,8 L7,12';
+  return`<svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:block;margin:auto"><path d="${d}" stroke="#34C759" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 }
 
-/* ════════ CROCHET GRID ════════ */
-function rowDir(r) { return r % 2 === 0 ? 'ltr' : 'rtl'; }
-
-function arrowSvg(dir) {
-  const d = dir === 'ltr' ? 'M3,8 L13,8 M9,4 L13,8 L9,12' : 'M13,8 L3,8 M7,4 L3,8 L7,12';
-  return `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:block;margin:auto">
-    <path d="${d}" stroke="#34C759" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
-}
-
-function renderCrochetGrid() {
-  const t = document.getElementById('cro-grid');
-  let h = '<tr><td class="rn"></td>';
-  for (let c = 0; c < S.cols; c++) h += `<td class="cn"><span>${c+1}</span></td>`;
-  h += '</tr>';
-  for (let r = S.rows-1; r >= 0; r--) {
-    h += `<tr><td class="rn"><span>${r+1}</span></td>`;
-    for (let c = 0; c < S.cols; c++) {
-      const key = `${r},${c}`, cell = S.grid[r][c], chk = S.checked.has(key);
-      let cls = 'gc';
-      if (r === S.crRow)    cls += ' cro-cur';
-      else if (r < S.crRow) cls += ' cro-done';
-      else                  cls += ' cro-fut';
-      if (cell === true)   cls += ' filled';
-      if (cell === 'void') cls += ' void';
-      h += `<td class="${cls}" data-r="${r}" data-c="${c}">${chk && cell !== 'void' ? arrowSvg(rowDir(r)) : ''}</td>`;
+function renderCrochetGrid(){
+  const t=document.getElementById('cro-grid');
+  let h='<tr><td class="rn"></td>';
+  for(let c=0;c<S.cols;c++)h+=`<td class="cn"><span>${c+1}</span></td>`;
+  h+='</tr>';
+  for(let r=S.rows-1;r>=0;r--){
+    h+=`<tr><td class="rn"><span>${r+1}</span></td>`;
+    for(let c=0;c<S.cols;c++){
+      const key=`${r},${c}`,cell=S.grid[r][c],chk=S.checked.has(key);
+      let cls='gc';
+      if(r===S.crRow)cls+=' cro-cur';else if(r<S.crRow)cls+=' cro-done';else cls+=' cro-fut';
+      if(cell===true)cls+=' filled';if(cell==='void')cls+=' void';
+      h+=`<td class="${cls}" data-r="${r}" data-c="${c}">${chk&&cell!=='void'?arrowSvg(rowDir(r)):''}</td>`;
     }
-    h += '</tr>';
+    h+='</tr>';
   }
-  t.innerHTML = h;
-  bindCrochet();
-  updateCrochetUI();
-  updateMinimap('cro');
-  scrollToCurrentRow();
+  t.innerHTML=h;
+  bindCrochet();updateCrochetUI();updateMinimap('cro');scrollToCurRow();
 }
 
-function scrollToCurrentRow() {
-  const wrap = document.getElementById('cro-wrap');
-  const displayRow = S.rows - 1 - S.crRow; // visual row index from top (rows render top-to-bottom reversed)
-  const targetY = (displayRow + 1) * CELL; // +1 for header row of col numbers
-  const wrapH = wrap.clientHeight;
-  // Center the current row
-  wrap.scrollTop = targetY - wrapH / 2 + CELL / 2;
+function scrollToCurRow(){
+  const wrap=document.getElementById('cro-wrap');
+  const displayRow=S.rows-1-S.crRow;
+  const targetY=(displayRow+1)*CELL;
+  wrap.scrollTop=targetY-wrap.clientHeight/2+CELL/2;
 }
 
-function bindCrochet() {
-  const wrap = document.getElementById('cro-wrap');
-  wrap.onmousedown = e => {
-    isDown = true;
-    const td = e.target.closest('.gc[data-r]'); if (!td) return;
-    const r = +td.dataset.r, c = +td.dataset.c;
-    if (r > S.crRow) return;
-    if (r !== S.crRow) { S.crRow = r; renderCrochetGrid(); return; }
-    dragAction = S.checked.has(`${r},${c}`) ? 'uncheck' : 'check';
-    applyCheck(r, c, td);
+function bindCrochet(){
+  const wrap=document.getElementById('cro-wrap');
+  let tf=null;
+  wrap.onmousedown=e=>{
+    isDown=true;const td=e.target.closest('.gc[data-r]');if(!td)return;
+    const r=+td.dataset.r,c=+td.dataset.c;
+    if(r>S.crRow)return;
+    if(r!==S.crRow){S.crRow=r;renderCrochetGrid();return;}
+    dragAction=S.checked.has(`${r},${c}`)?'uncheck':'check';applyCheck(r,c,td);
   };
-  wrap.onmousemove = e => {
-    if (!isDown || !dragAction) return;
-    const td = e.target.closest('.gc[data-r]'); if (!td) return;
-    const r = +td.dataset.r, c = +td.dataset.c; if (r !== S.crRow) return;
-    applyCheck(r, c, td);
+  wrap.onmousemove=e=>{
+    if(!isDown||!dragAction)return;const td=e.target.closest('.gc[data-r]');if(!td)return;
+    const r=+td.dataset.r,c=+td.dataset.c;if(r!==S.crRow)return;applyCheck(r,c,td);
   };
-  wrap.ontouchstart = e => {
-    e.preventDefault(); isDown = true;
-    const td = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('#cro-grid .gc[data-r]');
-    if (!td) return;
-    const r = +td.dataset.r, c = +td.dataset.c;
-    if (r > S.crRow) return;
-    if (r !== S.crRow) { S.crRow = r; renderCrochetGrid(); return; }
-    dragAction = S.checked.has(`${r},${c}`) ? 'uncheck' : 'check';
-    applyCheck(r, c, td);
+  wrap.ontouchstart=e=>{
+    if(e.touches.length>=2){isDown=false;dragAction=null;e.preventDefault();tf={sl:wrap.scrollLeft,st:wrap.scrollTop,mx:(e.touches[0].clientX+e.touches[1].clientX)/2,my:(e.touches[0].clientY+e.touches[1].clientY)/2};return;}
+    e.preventDefault();isDown=true;
+    const td=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY)?.closest('#cro-grid .gc[data-r]');
+    if(!td)return;const r=+td.dataset.r,c=+td.dataset.c;
+    if(r>S.crRow)return;
+    if(r!==S.crRow){S.crRow=r;renderCrochetGrid();return;}
+    dragAction=S.checked.has(`${r},${c}`)?'uncheck':'check';applyCheck(r,c,td);
   };
-  wrap.ontouchmove = e => {
-    e.preventDefault(); if (!isDown || !dragAction) return;
-    const td = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('#cro-grid .gc[data-r]');
-    if (!td) return;
-    const r = +td.dataset.r, c = +td.dataset.c; if (r !== S.crRow) return;
-    applyCheck(r, c, td);
+  wrap.ontouchmove=e=>{
+    e.preventDefault();
+    if(e.touches.length>=2&&tf){const mx=(e.touches[0].clientX+e.touches[1].clientX)/2,my=(e.touches[0].clientY+e.touches[1].clientY)/2;wrap.scrollLeft=tf.sl-(mx-tf.mx);wrap.scrollTop=tf.st-(my-tf.my);updateMinimap('cro');return;}
+    if(!isDown||!dragAction)return;
+    const td=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY)?.closest('#cro-grid .gc[data-r]');
+    if(!td)return;const r=+td.dataset.r,c=+td.dataset.c;if(r!==S.crRow)return;applyCheck(r,c,td);
   };
-  wrap.onscroll = () => updateMinimap('cro');
+  wrap.ontouchend=()=>{tf=null;};
+  wrap.onscroll=()=>updateMinimap('cro');
 }
 
-function applyCheck(r, c, td) {
-  if (S.grid[r][c] === 'void') return;
-  const key = `${r},${c}`;
-  if (dragAction === 'check' && !S.checked.has(key)) {
-    S.checked.add(key); td.innerHTML = arrowSvg(rowDir(r));
-    updateProgress(); autoAdvance();
-  } else if (dragAction === 'uncheck' && S.checked.has(key)) {
-    S.checked.delete(key); td.innerHTML = '';
-    updateProgress();
+function applyCheck(r,c,td){
+  if(S.grid[r][c]==='void')return;
+  const key=`${r},${c}`;
+  if(dragAction==='check'&&!S.checked.has(key)){S.checked.add(key);td.innerHTML=arrowSvg(rowDir(r));updateProgress();autoAdvance();schedSave();}
+  else if(dragAction==='uncheck'&&S.checked.has(key)){S.checked.delete(key);td.innerHTML='';updateProgress();schedSave();}
+}
+function autoAdvance(){
+  const nv=Array.from({length:S.cols},(_,c)=>S.grid[S.crRow][c]!=='void');
+  if(nv.every((ok,c)=>!ok||S.checked.has(`${S.crRow},${c}`))&&S.crRow<S.rows-1){
+    setTimeout(()=>{S.crRow++;renderCrochetGrid();showToast(`Row ${S.crRow+1} ↑`);schedSave();},280);
   }
 }
-
-function autoAdvance() {
-  const nonVoid = Array.from({ length: S.cols }, (_, c) => S.grid[S.crRow][c] !== 'void');
-  if (nonVoid.every((ok, c) => !ok || S.checked.has(`${S.crRow},${c}`)) && S.crRow < S.rows - 1) {
-    setTimeout(() => { S.crRow++; renderCrochetGrid(); showToast(`Row ${S.crRow + 1} ↑`); }, 280);
-  }
-}
-
-function updateCrochetUI() {
-  document.getElementById('cur-num').textContent = S.crRow + 1;
-  document.getElementById('row-tot').textContent = ` / ${S.rows}`;
-  document.getElementById('hdr-cur').textContent = S.crRow + 1;
-  document.getElementById('hdr-tot').textContent = S.rows;
+function updateCrochetUI(){
+  document.getElementById('cur-num').textContent=S.crRow+1;
+  document.getElementById('row-tot').textContent=` / ${S.rows}`;
+  document.getElementById('hdr-cur').textContent=S.crRow+1;
+  document.getElementById('hdr-tot').textContent=S.rows;
   updateProgress();
 }
+function updateProgress(){
+  let done=S.crRow*S.cols;
+  for(const k of S.checked)if(+k.split(',')[0]===S.crRow)done++;
+  const pct=S.rows*S.cols>0?Math.round(done/(S.rows*S.cols)*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-lbl').textContent=pct+'%';
+}
+function prevRow(){if(S.crRow>0){S.crRow--;renderCrochetGrid();schedSave();}}
+function nextRow(){if(S.crRow<S.rows-1){S.crRow++;renderCrochetGrid();schedSave();}}
+function resetProgress(){S.crRow=0;S.checked.clear();renderCrochetGrid();schedSave();showToast('Progress reset');}
 
-function updateProgress() {
-  let done = S.crRow * S.cols;
-  for (const k of S.checked) if (+k.split(',')[0] === S.crRow) done++;
-  const pct = S.rows * S.cols > 0 ? Math.round(done / (S.rows * S.cols) * 100) : 0;
-  document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-lbl').textContent = pct + '%';
+/* ════ TOOLS ════ */
+function setTool(id){
+  if(S.panMode)togglePan();
+  S.tool=id;
+  ['fill','erase','void'].forEach(t=>document.getElementById('btn-'+t).classList.toggle('active',t===id));
 }
 
-function prevRow() { if (S.crRow > 0) { S.crRow--; renderCrochetGrid(); } }
-function nextRow() { if (S.crRow < S.rows - 1) { S.crRow++; renderCrochetGrid(); } }
-function resetProgress() { S.crRow = 0; S.checked.clear(); renderCrochetGrid(); showToast('Progress reset'); }
-
-/* ════════ TOOL ════════ */
-function setTool(id) {
-  if (S.panMode) { togglePan(); } // exit pan mode when picking a draw tool
-  S.tool = id;
-  ['fill','erase','void'].forEach(t =>
-    document.getElementById('btn-'+t).classList.toggle('active', t === id));
-}
-
-/* ════════ MINIMAP ════════ */
-const MM = { W: 120, H: 90 };
-
-function updateMinimap(which) {
-  const canvasId  = which === 'pat' ? 'minimap' : 'cro-minimap';
-  const wrapId    = which === 'pat' ? 'pat-wrap' : 'cro-wrap';
-  const wrapElId  = which === 'pat' ? 'minimap-wrap' : 'cro-minimap-wrap';
-  const canvas    = document.getElementById(canvasId);
-  const wrap      = document.getElementById(wrapId);
-  const wrapEl    = document.getElementById(wrapElId);
-  if (!canvas || !wrap) return;
-
-  const gridW = S.cols * CELL + 24; // +24 for row numbers col
-  const gridH = (S.rows + 1) * CELL; // +1 for col numbers row
-
-  // Only show minimap if grid is larger than viewport in either dimension
-  const show = gridW > wrap.clientWidth || gridH > wrap.clientHeight;
-  wrapEl.style.display = show ? 'block' : 'none';
-  if (!show) return;
-
-  const ctx = canvas.getContext('2d');
-  const scaleX = MM.W / gridW, scaleY = MM.H / gridH;
-  const cellW = CELL * scaleX, cellH = CELL * scaleY;
-  const offX = 24 * scaleX; // row-number column offset
-
-  ctx.clearRect(0, 0, MM.W, MM.H);
-
-  // Background
-  ctx.fillStyle = '#F5F5F7';
-  ctx.fillRect(0, 0, MM.W, MM.H);
-
-  // Draw cells
-  for (let r = 0; r < S.rows; r++) {
-    const vr = S.rows - 1 - r; // visual row (top-down in minimap)
-    const y = (vr + 1) * cellH; // +1 for header
-    for (let c = 0; c < S.cols; c++) {
-      const x = offX + c * cellW;
-      const cell = S.grid[r][c];
-      if (which === 'cro') {
-        if (r === S.crRow)      ctx.fillStyle = '#FFF3CC';
-        else if (r < S.crRow)   ctx.fillStyle = '#D4EDDA';
-        else                    ctx.fillStyle = 'rgba(245,245,247,.3)';
-      } else {
-        ctx.fillStyle = '#F5F5F7';
-      }
-      ctx.fillRect(x, y, cellW, cellH);
-      if (cell === true) {
-        ctx.fillStyle = '#1D1D1F';
-        ctx.fillRect(x + .5, y + .5, cellW - 1, cellH - 1);
-      } else if (cell === 'void') {
-        ctx.fillStyle = '#C8C8CC';
-        ctx.fillRect(x, y, cellW, cellH);
-      }
-      // checked cells in crochet mode
-      if (which === 'cro' && S.checked.has(`${r},${c}`)) {
-        ctx.fillStyle = '#34C759';
-        ctx.fillRect(x + cellW*.2, y + cellH*.2, cellW*.6, cellH*.6);
-      }
+/* ════ MINIMAP ════ */
+function updateMinimap(which){
+  const cid=which==='pat'?'pat-mm':'cro-mm',wid=which==='pat'?'pat-wrap':'cro-wrap',mid=which==='pat'?'pat-mm-wrap':'cro-mm-wrap',rid=which==='pat'?'pat-mm-restore':'cro-mm-restore';
+  const canvas=document.getElementById(cid),wrap=document.getElementById(wid),mmWrap=document.getElementById(mid),rst=document.getElementById(rid);
+  if(!canvas||!wrap)return;
+  const gridW=S.cols*CELL+24,gridH=(S.rows+1)*CELL;
+  const show=gridW>wrap.clientWidth||gridH>wrap.clientHeight;
+  const userHid=rst.classList.contains('visible');
+  mmWrap.classList.toggle('visible',show&&!userHid);
+  if(!show){rst.classList.remove('visible');return;}
+  const ctx=canvas.getContext('2d'),sx=MM.W/gridW,sy=MM.H/gridH,cw=CELL*sx,ch=CELL*sy,ox=24*sx;
+  ctx.clearRect(0,0,MM.W,MM.H);ctx.fillStyle='#F5F5F7';ctx.fillRect(0,0,MM.W,MM.H);
+  for(let r=0;r<S.rows;r++){
+    const vr=S.rows-1-r,y=(vr+1)*ch;
+    for(let c=0;c<S.cols;c++){
+      const x=ox+c*cw,cell=S.grid[r][c];
+      ctx.fillStyle=which==='cro'?(r===S.crRow?'#FFF3CC':r<S.crRow?'#D4EDDA':'rgba(245,245,247,.25)'):'#FFFFFF';
+      ctx.fillRect(x,y,cw,ch);
+      if(cell===true){ctx.fillStyle='#1D1D1F';ctx.fillRect(x+.5,y+.5,cw-1,ch-1);}
+      else if(cell==='void'){ctx.fillStyle='#C8C8CC';ctx.fillRect(x,y,cw,ch);}
+      if(which==='cro'&&S.checked.has(`${r},${c}`)){ctx.fillStyle='#34C759';ctx.fillRect(x+cw*.2,y+ch*.2,cw*.6,ch*.6);}
     }
   }
+  ctx.strokeStyle='#D1D1D6';ctx.lineWidth=.3;
+  for(let c=0;c<=S.cols;c++){ctx.beginPath();ctx.moveTo(ox+c*cw,ch);ctx.lineTo(ox+c*cw,ch+S.rows*ch);ctx.stroke();}
+  const vpX=ox+(wrap.scrollLeft/CELL)*cw,vpY=(wrap.scrollTop/CELL)*ch;
+  const vpW=Math.min((wrap.clientWidth/CELL)*cw,MM.W-vpX),vpH=Math.min((wrap.clientHeight/CELL)*ch,MM.H-vpY);
+  ctx.fillStyle='rgba(0,113,227,.08)';ctx.fillRect(vpX,vpY,vpW,vpH);
+  ctx.strokeStyle='#0071E3';ctx.lineWidth=1.5;ctx.strokeRect(vpX,vpY,vpW,vpH);
+}
+function minimapClick(e,which){
+  const cid=which==='pat'?'pat-mm':'cro-mm',wid=which==='pat'?'pat-wrap':'cro-wrap';
+  const canvas=document.getElementById(cid),wrap=document.getElementById(wid);
+  const rect=canvas.getBoundingClientRect();
+  wrap.scrollLeft=((e.clientX-rect.left)/MM.W)*(S.cols*CELL+24)-wrap.clientWidth/2;
+  wrap.scrollTop=((e.clientY-rect.top)/MM.H)*((S.rows+1)*CELL)-wrap.clientHeight/2;
+}
+function hideMap(w){document.getElementById(w==='pat'?'pat-mm-wrap':'cro-mm-wrap').classList.remove('visible');document.getElementById(w==='pat'?'pat-mm-restore':'cro-mm-restore').classList.add('visible');}
+function showMap(w){document.getElementById(w==='pat'?'pat-mm-restore':'cro-mm-restore').classList.remove('visible');updateMinimap(w);}
 
-  // Grid lines
-  ctx.strokeStyle = '#D1D1D6'; ctx.lineWidth = .3;
-  for (let c = 0; c <= S.cols; c++) {
-    ctx.beginPath();
-    ctx.moveTo(offX + c * cellW, cellH);
-    ctx.lineTo(offX + c * cellW, cellH + S.rows * cellH);
-    ctx.stroke();
-  }
-
-  // Viewport rect
-  const vpX = offX + (wrap.scrollLeft / CELL) * cellW;
-  const vpY = (wrap.scrollTop / CELL) * cellH;
-  const vpW = (wrap.clientWidth / CELL) * cellW;
-  const vpH = (wrap.clientHeight / CELL) * cellH;
-
-  ctx.strokeStyle = '#0071E3'; ctx.lineWidth = 1.5;
-  ctx.strokeRect(vpX, vpY, Math.min(vpW, MM.W - vpX), Math.min(vpH, MM.H - vpY));
-  ctx.fillStyle = 'rgba(0,113,227,.08)';
-  ctx.fillRect(vpX, vpY, Math.min(vpW, MM.W - vpX), Math.min(vpH, MM.H - vpY));
+function initMMDrag(dragId,wrapId){
+  const hdr=document.getElementById(dragId),mmW=document.getElementById(wrapId);
+  if(!hdr||!mmW)return;
+  let ox=0,oy=0,sx=0,sy=0,drag=false;
+  const start=(cx,cy)=>{drag=true;const r=mmW.getBoundingClientRect(),a=mmW.parentElement.getBoundingClientRect();sx=cx;sy=cy;ox=r.left-a.left;oy=r.top-a.top;mmW.style.bottom='auto';mmW.style.right='auto';mmW.style.left=ox+'px';mmW.style.top=oy+'px';};
+  const move=(cx,cy)=>{if(!drag)return;const a=mmW.parentElement.getBoundingClientRect();let nx=ox+(cx-sx),ny=oy+(cy-sy);nx=Math.max(0,Math.min(nx,a.width-mmW.offsetWidth));ny=Math.max(0,Math.min(ny,a.height-mmW.offsetHeight));mmW.style.left=nx+'px';mmW.style.top=ny+'px';};
+  const end=()=>{drag=false;};
+  hdr.addEventListener('mousedown',e=>{e.preventDefault();start(e.clientX,e.clientY);});
+  hdr.addEventListener('touchstart',e=>{e.stopPropagation();start(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  document.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+  document.addEventListener('touchmove',e=>{if(drag){e.preventDefault();move(e.touches[0].clientX,e.touches[0].clientY);}},{passive:false});
+  document.addEventListener('mouseup',end);document.addEventListener('touchend',end);
 }
 
-function minimapClick(e) {
-  navigateMinimap(e, 'pat-wrap', 'minimap');
+/* ════ SETTINGS ════ */
+function calcSettings(){
+  const yw=v('yw'),gst=+v('gst')||16,grw=+v('grw')||18,pw=+v('pw')||20,ph=+v('ph')||20;
+  const cols=Math.round(gst/10*pw),rows=Math.round(grw/10*ph);
+  document.getElementById('info-proj').innerHTML=`<b>Recommended hook for ${YARN[yw].n}</b>: ${YARN[yw].h} mm &nbsp;·&nbsp; For <b>${pw}×${ph} cm</b>: <b>${cols} stitches × ${rows} rows</b> &nbsp;·&nbsp; 1 stitch ≈ ${(10/gst).toFixed(2)} cm`;
 }
-function crominimapClick(e) {
-  navigateMinimap(e, 'cro-wrap', 'cro-minimap');
-}
-function navigateMinimap(e, wrapId, canvasId) {
-  const canvas = document.getElementById(canvasId);
-  const wrap   = document.getElementById(wrapId);
-  const rect   = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-  const gridW = S.cols * CELL + 24, gridH = (S.rows + 1) * CELL;
-  const scaleX = MM.W / gridW, scaleY = MM.H / gridH;
-  wrap.scrollLeft = (mx / scaleX) - wrap.clientWidth / 2;
-  wrap.scrollTop  = (my / scaleY) - wrap.clientHeight / 2;
+function applyFromSettings(){
+  const gst=+v('gst')||16,grw=+v('grw')||18,pw=+v('pw')||20,ph=+v('ph')||20;
+  const cols=clamp(Math.round(gst/10*pw),2,100),rows=clamp(Math.round(grw/10*ph),1,80);
+  set('gcols',cols);set('grows',rows);
+  S.cols=cols;S.rows=rows;
+  S.grid=Array.from({length:rows},()=>new Array(cols).fill(null));
+  renderPatternGrid();saveCurrentProject();showToast(`Grid ${cols}×${rows} ready`);
 }
 
-/* ════════ SETTINGS ════════ */
-function calcSettings() {
-  const yw = v('yw'), gst = +v('gst')||16, grw = +v('grw')||18;
-  const pw = +v('pw')||20, ph = +v('ph')||20;
-  const cols = Math.round(gst/10*pw), rows = Math.round(grw/10*ph);
-  document.getElementById('info-proj').innerHTML =
-    `<b>Recommended hook for ${YARN[yw].n}</b>: ${YARN[yw].h} mm &nbsp;·&nbsp; For <b>${pw} × ${ph} cm</b>: <b>${cols} stitches × ${rows} rows</b> &nbsp;·&nbsp; 1 stitch ≈ ${(10/gst).toFixed(2)} cm`;
-}
-function applyFromSettings() {
-  const gst = +v('gst')||16, grw = +v('grw')||18;
-  const pw = +v('pw')||20, ph = +v('ph')||20;
-  const cols = clamp(Math.round(gst/10*pw), 2, 100);
-  const rows = clamp(Math.round(grw/10*ph), 1, 80);
-  set('gcols', cols); set('grows', rows);
-  initGrid(cols, rows); renderPatternGrid();
-  showToast(`Grid ${cols} × ${rows} ready`);
-}
-
-/* ════════ NAV ════════ */
-function switchTab(tab) {
-  ['setup','pattern','crochet'].forEach((t,i) => {
-    document.querySelectorAll('.tab-btn')[i].classList.toggle('active', t===tab);
-    document.getElementById('panel-'+t).classList.toggle('active', t===tab);
+/* ════ NAV ════ */
+function switchTab(tab){
+  ['setup','pattern','crochet'].forEach((t,i)=>{
+    document.querySelectorAll('.tab')[i].classList.toggle('active',t===tab);
+    document.getElementById('panel-'+t).classList.toggle('active',t===tab);
   });
-  document.getElementById('hdr-row-badge').classList.toggle('visible', tab==='crochet');
-  if (tab === 'crochet') renderCrochetGrid();
-  if (tab === 'pattern') { renderPatternGrid(); }
+  document.getElementById('hdr-row').classList.toggle('on',tab==='crochet');
+  if(tab==='crochet')renderCrochetGrid();
+  if(tab==='pattern'){renderPatternGrid();}
 }
 
-/* ════════ EXPORT PNG ════════ */
-function exportPNG() {
-  const ml=28, mt=22, pad=18;
-  const W = S.cols*CELL + ml + pad*2, H = S.rows*CELL + mt + pad*2;
-  const canvas = document.createElement('canvas');
-  canvas.width = W*2; canvas.height = H*2;
-  const ctx = canvas.getContext('2d'); ctx.scale(2,2);
-  ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
-  const ox=pad+ml, oy=pad+mt;
-  for (let r=0; r<S.rows; r++) {
-    const vr=S.rows-1-r, y=oy+vr*CELL;
-    for (let c=0; c<S.cols; c++) {
-      const x=ox+c*CELL, cell=S.grid[r][c];
-      if (cell===true) { ctx.fillStyle='#1D1D1F'; ctx.fillRect(x+.5,y+.5,CELL-1,CELL-1); }
-      else if (cell==='void') {
-        ctx.fillStyle='#EBEBED'; ctx.fillRect(x+.5,y+.5,CELL-1,CELL-1);
-        ctx.strokeStyle='#C8C8CC'; ctx.lineWidth=.8;
-        ctx.save(); ctx.rect(x,y,CELL,CELL); ctx.clip();
-        for (let i=-CELL; i<CELL*2; i+=5) { ctx.beginPath(); ctx.moveTo(x+i,y); ctx.lineTo(x+i+CELL,y+CELL); ctx.stroke(); }
-        ctx.restore();
-      } else { ctx.strokeStyle='#D1D1D6'; ctx.lineWidth=.5; ctx.strokeRect(x+.25,y+.25,CELL-.5,CELL-.5); }
+/* ════ EXPORT ════ */
+function exportPNG(){
+  const ml=28,mt=22,pad=18,W=S.cols*CELL+ml+pad*2,H=S.rows*CELL+mt+pad*2;
+  const canvas=document.createElement('canvas');canvas.width=W*2;canvas.height=H*2;
+  const ctx=canvas.getContext('2d');ctx.scale(2,2);
+  ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H);
+  const ox=pad+ml,oy=pad+mt;
+  for(let r=0;r<S.rows;r++){
+    const vr=S.rows-1-r,y=oy+vr*CELL;
+    for(let c=0;c<S.cols;c++){
+      const x=ox+c*CELL,cell=S.grid[r][c];
+      if(cell===true){ctx.fillStyle='#1D1D1F';ctx.fillRect(x+.5,y+.5,CELL-1,CELL-1);}
+      else if(cell==='void'){ctx.fillStyle='#EBEBED';ctx.fillRect(x+.5,y+.5,CELL-1,CELL-1);ctx.strokeStyle='#C8C8CC';ctx.lineWidth=.8;ctx.save();ctx.rect(x,y,CELL,CELL);ctx.clip();for(let i=-CELL;i<CELL*2;i+=5){ctx.beginPath();ctx.moveTo(x+i,y);ctx.lineTo(x+i+CELL,y+CELL);ctx.stroke();}ctx.restore();}
+      else{ctx.strokeStyle='#D1D1D6';ctx.lineWidth=.5;ctx.strokeRect(x+.25,y+.25,CELL-.5,CELL-.5);}
     }
   }
-  ctx.font='9px sans-serif'; ctx.fillStyle='#AEAEB2';
-  ctx.textBaseline='middle'; ctx.textAlign='right';
-  for (let r=0; r<S.rows; r++) ctx.fillText(r+1, ox-4, oy+(S.rows-1-r)*CELL+CELL/2);
-  ctx.textAlign='center'; ctx.textBaseline='alphabetic';
-  for (let c=0; c<S.cols; c++) ctx.fillText(c+1, ox+c*CELL+CELL/2, oy-5);
-  const a=document.createElement('a'); a.download='crochet-chart.png'; a.href=canvas.toDataURL(); a.click();
+  ctx.font='9px sans-serif';ctx.fillStyle='#AEAEB2';ctx.textBaseline='middle';ctx.textAlign='right';
+  for(let r=0;r<S.rows;r++)ctx.fillText(r+1,ox-4,oy+(S.rows-1-r)*CELL+CELL/2);
+  ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  for(let c=0;c<S.cols;c++)ctx.fillText(c+1,ox+c*CELL+CELL/2,oy-5);
+  const a=document.createElement('a');a.download=`${S.projectName||'crochet-chart'}.png`;a.href=canvas.toDataURL();a.click();
   showToast('Exported!');
 }
 
-/* ════════ UTILS ════════ */
-const v   = id => document.getElementById(id)?.value;
-const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
-const clamp = (n,min,max) => Math.min(max,Math.max(min,n));
+/* ════ UTILS ════ */
+const v=id=>document.getElementById(id)?.value;
+const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val;};
+const clamp=(n,min,max)=>Math.min(max,Math.max(min,n));
+function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2000);}
 
-function showToast(msg) {
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2000);
-}
+document.addEventListener('mouseup',()=>{isDown=false;dragAction=null;});
+document.addEventListener('touchend',()=>{isDown=false;dragAction=null;});
 
-document.addEventListener('mouseup',  () => { isDown=false; dragAction=null; });
-document.addEventListener('touchend', () => { isDown=false; dragAction=null; });
-
-/* ════════ INIT ════════ */
-initGrid(20,20);
-renderPatternGrid();
-calcSettings();
+/* ════ INIT ════ */
+(function init(){
+  let projects=loadProjects();
+  if(!projects.length){const p=makeProject('My first pattern');projects=[p];saveProjects(projects);}
+  loadProject(projects[projects.length-1]);
+  calcSettings();
+  initMMDrag('pat-mm-drag','pat-mm-wrap');
+  initMMDrag('cro-mm-drag','cro-mm-wrap');
+})();
 </script>
 </body>
 </html>
