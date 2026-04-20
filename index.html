@@ -6,427 +6,335 @@
   <title>Crochet Chart</title>
   <style>
     :root {
-      --bg:          #F5F5F7;
-      --surface:     #FFFFFF;
-      --surface-2:   #F5F5F7;
-      --accent:      #0071E3;
-      --accent-l:    #E8F0FD;
-      --text:        #1D1D1F;
-      --text-2:      #6E6E73;
-      --text-3:      #AEAEB2;
-      --border:      rgba(0,0,0,.08);
-      --border-2:    rgba(0,0,0,.14);
-      --grid-b:      #D1D1D6;
-      --filled:      #1D1D1F;
-      --cur-row-l:   #FFF3CC;
-      --cur-row:     #FF9F0A;
-      --done-row-l:  #D4EDDA;
-      --done-row:    #34C759;
-      --radius:      12px;
-      --radius-sm:   8px;
+      --bg:         #F5F5F7;
+      --surface:    #FFFFFF;
+      --surface-2:  #F5F5F7;
+      --accent:     #0071E3;
+      --accent-l:   #E3EEFB;
+      --text:       #1D1D1F;
+      --text-2:     #6E6E73;
+      --text-3:     #AEAEB2;
+      --border:     rgba(0,0,0,.08);
+      --border-2:   rgba(0,0,0,.14);
+      --grid-b:     #D1D1D6;
+      --filled:     #1D1D1F;
+      --cur-l:      #FFF3CC;
+      --cur:        #FF9F0A;
+      --done-l:     #D4EDDA;
+      --done:       #34C759;
+      --void-bg:    #EBEBED;
+      --r:          12px;
+      --rs:         8px;
+      --hh:         52px;  /* header height */
+      --th:         44px;  /* tabs height */
     }
-
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-    body {
+    html, body {
+      height: 100%;
+      overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
       font-size: 15px;
-      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── HEADER ── */
-    header {
-      background: rgba(245,245,247,.85);
+    /* ── STICKY HEADER ── */
+    #app-header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--hh);
+      background: rgba(245,245,247,.92);
       backdrop-filter: saturate(180%) blur(20px);
       -webkit-backdrop-filter: saturate(180%) blur(20px);
       border-bottom: .5px solid var(--border-2);
-      padding: 0 20px;
-      padding-top: env(safe-area-inset-top);
-      position: sticky;
-      top: 0;
-      z-index: 30;
-    }
-
-    .header-inner {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
+      padding: 0 16px;
       gap: 12px;
-      height: 52px;
+      z-index: 50;
     }
-    .logo {
-      font-size: 17px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -.01em;
+    .logo { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+    .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+    /* row badge in header — only visible in work mode */
+    .hdr-row-badge {
+      font-size: 14px; font-weight: 500; color: var(--text-2);
+      background: var(--surface-2); border-radius: 99px;
+      padding: 4px 12px; white-space: nowrap;
+      display: none;
     }
-    .hdr-actions { margin-left: auto; display: flex; gap: 8px; }
+    .hdr-row-badge.visible { display: block; }
+    .hdr-row-badge b { color: var(--text); }
+
     .hdr-btn {
-      background: var(--surface-2);
-      border: none;
-      color: var(--accent);
-      font-family: inherit;
-      font-size: 13px;
-      font-weight: 500;
-      padding: 6px 13px;
-      border-radius: 99px;
-      cursor: pointer;
-      transition: opacity .15s;
-      white-space: nowrap;
+      background: var(--surface-2); border: none;
+      color: var(--accent); font-family: inherit; font-size: 13px; font-weight: 500;
+      padding: 6px 13px; border-radius: 99px; cursor: pointer;
+      transition: opacity .15s; white-space: nowrap;
     }
     .hdr-btn:active { opacity: .6; }
 
-    /* ── TABS ── */
-    .tabs {
-      display: flex;
-      background: var(--bg);
-      padding: 10px 16px 0;
-      gap: 2px;
-      overflow-x: auto;
-      scrollbar-width: none;
+    /* ── STICKY TABS ── */
+    #app-tabs {
+      position: fixed; top: var(--hh); left: 0; right: 0;
+      height: var(--th);
+      background: rgba(245,245,247,.92);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: .5px solid var(--border-2);
+      display: flex; align-items: stretch;
+      padding: 0 8px;
+      z-index: 49;
     }
-    .tabs::-webkit-scrollbar { display: none; }
     .tab-btn {
-      background: none;
-      border: none;
+      background: none; border: none;
       border-bottom: 2px solid transparent;
-      padding: 8px 14px 10px;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-2);
-      cursor: pointer;
+      padding: 0 14px;
+      font-family: inherit; font-size: 14px; font-weight: 400;
+      color: var(--text-2); cursor: pointer;
       white-space: nowrap;
       transition: color .15s;
       flex-shrink: 0;
     }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
 
-    /* ── CONTENT ── */
-    .content { padding: 20px 16px 40px; max-width: 900px; }
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    /* ── FORM ── */
-    .section-card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 0;
-      margin-bottom: 14px;
+    /* ── MAIN AREA ── */
+    #app-main {
+      position: fixed;
+      top: calc(var(--hh) + var(--th));
+      left: 0; right: 0; bottom: 0;
       overflow: hidden;
-      border: .5px solid var(--border);
+    }
+
+    .panel { display: none; height: 100%; flex-direction: column; }
+    .panel.active { display: flex; }
+
+    /* ── SETTINGS PANEL (scrollable) ── */
+    #panel-setup { overflow-y: auto; padding: 16px; }
+
+    .section-label {
+      font-size: 11px; font-weight: 600; color: var(--text-2);
+      letter-spacing: .06em; text-transform: uppercase;
+      padding: 4px 4px 6px; margin-top: 16px;
+    }
+    .section-label:first-child { margin-top: 0; }
+    .section-card {
+      background: var(--surface); border-radius: var(--r);
+      overflow: hidden; border: .5px solid var(--border);
+      margin-bottom: 4px;
     }
     .form-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 13px 16px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
       border-bottom: .5px solid var(--border);
     }
     .form-row:last-child { border-bottom: none; }
-    .form-row label {
-      font-size: 15px;
-      color: var(--text);
-      flex: 1;
-      min-width: 0;
-    }
+    .form-row label { font-size: 15px; color: var(--text); flex: 1; }
     .form-row input[type=number],
     .form-row select {
-      background: var(--surface-2);
-      border: .5px solid var(--border-2);
-      border-radius: var(--radius-sm);
-      padding: 7px 10px;
-      font-family: inherit;
-      font-size: 15px;
-      color: var(--text);
-      outline: none;
-      width: 100px;
-      text-align: right;
-      -moz-appearance: textfield;
-      appearance: none;
-      flex-shrink: 0;
+      background: var(--surface-2); border: .5px solid var(--border-2);
+      border-radius: var(--rs); padding: 7px 10px;
+      font-family: inherit; font-size: 15px; color: var(--text);
+      outline: none; -moz-appearance: textfield; appearance: none;
     }
-    .form-row select {
-      width: 150px;
-      text-align: left;
-      padding-right: 8px;
-    }
+    .form-row input[type=number] { width: 90px; text-align: right; }
+    .form-row select { width: 150px; }
     input[type=number]::-webkit-outer-spin-button,
     input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
     .form-row input:focus, .form-row select:focus { border-color: var(--accent); }
 
-    .section-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-2);
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      padding: 6px 16px 4px;
-      margin-top: 18px;
-      margin-bottom: 2px;
-    }
-
     .info-banner {
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 13px 16px;
-      font-size: 14px;
-      color: var(--text-2);
-      line-height: 1.8;
-      margin-bottom: 14px;
-      border: .5px solid var(--border);
+      background: var(--surface); border-radius: var(--r);
+      padding: 12px 16px; font-size: 14px; color: var(--text-2);
+      line-height: 1.8; margin-bottom: 4px; border: .5px solid var(--border);
     }
     .info-banner b { color: var(--text); font-weight: 500; }
 
     .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      padding: 14px 22px;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      width: 100%;
-      transition: opacity .15s, transform .1s;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: var(--r); padding: 14px 22px;
+      font-family: inherit; font-size: 15px; font-weight: 500;
+      cursor: pointer; width: 100%; margin-top: 12px;
+      transition: opacity .15s;
     }
-    .btn-primary:active { opacity: .8; transform: scale(.99); }
+    .btn-primary:active { opacity: .8; }
 
-    /* ── GAUGE INFO ── */
-    details.gauge-info { margin-bottom: 14px; }
+    details.gauge-info { margin-top: 4px; margin-bottom: 4px; }
     details.gauge-info summary {
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 13px 16px;
-      background: var(--surface);
-      border: .5px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--accent);
-      cursor: pointer;
-      transition: background .15s;
-      -webkit-user-select: none;
-      user-select: none;
+      list-style: none; display: flex; align-items: center; gap: 8px;
+      padding: 12px 16px; background: var(--surface); border: .5px solid var(--border);
+      border-radius: var(--r); font-size: 15px; font-weight: 500; color: var(--accent);
+      cursor: pointer; -webkit-user-select: none; user-select: none;
     }
     details.gauge-info summary::-webkit-details-marker { display: none; }
-    details.gauge-info summary:active { background: var(--surface-2); }
-    details.gauge-info[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: .5px solid var(--border); }
-    .gauge-body {
-      background: var(--surface);
-      border: .5px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 var(--radius) var(--radius);
-      padding: 0;
-      overflow: hidden;
-    }
-    .gauge-step {
-      padding: 14px 16px;
-      border-bottom: .5px solid var(--border);
-      font-size: 14px;
-      line-height: 1.7;
-      color: var(--text-2);
-    }
+    details.gauge-info[open] summary { border-radius: var(--r) var(--r) 0 0; border-bottom: .5px solid var(--border); }
+    .gauge-body { background: var(--surface); border: .5px solid var(--border); border-top: none; border-radius: 0 0 var(--r) var(--r); overflow: hidden; }
+    .gauge-step { padding: 13px 16px; border-bottom: .5px solid var(--border); font-size: 14px; line-height: 1.7; color: var(--text-2); }
     .gauge-step:last-child { border-bottom: none; }
-    .gauge-step-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: .02em;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-    .step-num {
-      width: 20px; height: 20px;
-      background: var(--accent);
-      color: #fff;
-      border-radius: 50%;
-      font-size: 11px;
-      font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
+    .gauge-step-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 7px; }
+    .step-num { width: 20px; height: 20px; background: var(--accent); color: #fff; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .gauge-step b { color: var(--text); font-weight: 500; }
 
-    /* ── PATTERN TAB ── */
+    /* ── TOOLBAR ── */
     .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+      padding: 8px 12px;
       background: var(--surface);
-      border: .5px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: 12px;
+      border-bottom: .5px solid var(--border);
       flex-wrap: wrap;
     }
     .tool-btn {
-      display: flex; align-items: center; gap: 7px;
-      padding: 7px 14px; min-height: 36px;
-      border: .5px solid var(--border-2); border-radius: var(--radius-sm);
-      background: var(--surface-2);
-      font-family: inherit; font-size: 14px; font-weight: 500;
-      color: var(--text-2); cursor: pointer;
-      transition: all .12s;
-      white-space: nowrap;
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; height: 34px;
+      border: .5px solid var(--border-2); border-radius: var(--rs);
+      background: var(--surface-2); font-family: inherit; font-size: 13px; font-weight: 500;
+      color: var(--text-2); cursor: pointer; white-space: nowrap; transition: all .12s;
     }
     .tool-btn.active { background: var(--accent-l); border-color: var(--accent); color: var(--accent); }
     .tool-btn:active:not(.active) { opacity: .7; }
-    .tool-dot { width: 14px; height: 14px; border-radius: 3px; background: var(--filled); flex-shrink: 0; }
-    .tool-empty { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--border-2); flex-shrink: 0; }
-    .tool-void {
-      width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
-      background: repeating-linear-gradient(
-        45deg,
-        #D1D1D6 0px, #D1D1D6 2px,
-        #F0F0F2 2px, #F0F0F2 5px
-      );
-    }
-    /* void cells in the grid */
-    td.gc.void {
-      background: repeating-linear-gradient(
-        45deg,
-        #E8E8EC 0px, #E8E8EC 2.5px,
-        #F5F5F7 2.5px, #F5F5F7 6px
-      ) !important;
-      cursor: default;
-    }
-    td.gc.void.cro-cur, td.gc.void.cro-done, td.gc.void.cro-fut {
-      opacity: .5;
-    }
+    .tool-dot   { width: 13px; height: 13px; border-radius: 3px; background: var(--filled); flex-shrink: 0; }
+    .tool-empty { width: 13px; height: 13px; border-radius: 3px; border: 1.5px solid var(--border-2); flex-shrink: 0; }
+    .tool-void  { width: 13px; height: 13px; border-radius: 3px; flex-shrink: 0;
+      background: repeating-linear-gradient(45deg, #C8C8CC 0, #C8C8CC 1.5px, #EBEBED 1.5px, #EBEBED 4px); }
 
-    .gc-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .gc-row label { font-size: 14px; color: var(--text-2); }
-    .gc-row input[type=number] { width: 62px; padding: 7px 10px; font-size: 14px; text-align: center; }
-    .gc-row .btn-sec { margin-left: auto; }
+    /* Pan mode toggle */
+    .mode-sep { width: .5px; height: 22px; background: var(--border-2); margin: 0 2px; flex-shrink: 0; }
+    .pan-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; height: 34px;
+      border: .5px solid var(--border-2); border-radius: var(--rs);
+      background: var(--surface-2); font-family: inherit; font-size: 13px; font-weight: 500;
+      color: var(--text-2); cursor: pointer; white-space: nowrap; transition: all .12s;
+    }
+    .pan-btn.active { background: #FFF3CC; border-color: var(--cur); color: #A05000; }
 
+    /* grid size inputs in toolbar */
+    .gc-inp {
+      display: flex; align-items: center; gap: 5px;
+      margin-left: auto; font-size: 13px; color: var(--text-2);
+    }
+    .gc-inp input[type=number] {
+      width: 52px; padding: 5px 8px; font-size: 13px; text-align: center;
+      background: var(--surface-2); border: .5px solid var(--border-2);
+      border-radius: var(--rs); font-family: inherit; color: var(--text);
+      -moz-appearance: textfield; appearance: none;
+    }
+    .gc-inp input::-webkit-outer-spin-button,
+    .gc-inp input::-webkit-inner-spin-button { -webkit-appearance: none; }
     .btn-sec {
-      background: none;
-      border: .5px solid var(--border-2);
-      border-radius: var(--radius-sm);
-      padding: 7px 13px;
-      font-family: inherit;
-      font-size: 14px;
-      color: var(--text-2);
-      cursor: pointer;
-      transition: color .15s;
-      min-height: 36px;
+      background: none; border: .5px solid var(--border-2); border-radius: var(--rs);
+      padding: 6px 12px; font-family: inherit; font-size: 13px; color: var(--text-2);
+      cursor: pointer; height: 34px; white-space: nowrap;
     }
     .btn-sec:active { opacity: .6; }
 
-    /* ── GRID ── */
+    /* ── GRID WRAPPER ── */
+    .grid-area {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
     .grid-wrap {
+      position: absolute; inset: 0;
       overflow: auto;
-      display: block;
-      width: 100%;
-      border: .5px solid var(--border-2);
-      border-radius: var(--radius);
-      cursor: crosshair;
-      user-select: none;
-      -webkit-user-select: none;
-      background: var(--surface);
       -webkit-overflow-scrolling: touch;
     }
-    table.cg { border-collapse: collapse; background: var(--surface); width: max-content; }
-    td.gc {
-      width: 28px; height: 28px;
-      border: .5px solid var(--grid-b);
-      padding: 0; vertical-align: middle; text-align: center;
-    }
+    /* In pan mode, allow native scroll on touch */
+    .grid-wrap.pan-mode { touch-action: pan-x pan-y; cursor: grab; }
+    .grid-wrap.edit-mode { touch-action: none; cursor: crosshair; }
+    .grid-wrap.pan-mode:active { cursor: grabbing; }
+
+    table.cg { border-collapse: collapse; width: max-content; background: var(--surface); }
+    td.gc { width: 28px; height: 28px; border: .5px solid var(--grid-b); padding: 0; vertical-align: middle; text-align: center; }
     td.gc.filled { background: var(--filled); }
-    td.rn { width: 24px; border: none !important; padding: 0 3px 0 4px; cursor: default; text-align: right; }
+    td.gc.void   {
+      background: repeating-linear-gradient(45deg, #D8D8DC 0, #D8D8DC 2px, #EBEBED 2px, #EBEBED 6px) !important;
+    }
+    td.rn  { width: 24px; border: none !important; padding: 0 3px 0 6px; cursor: default; text-align: right; }
     td.rn span { font-size: 9px; color: var(--text-3); line-height: 28px; display: block; }
-    td.cn { width: 28px; height: 18px; border: none !important; text-align: center; cursor: default; }
+    td.cn  { width: 28px; height: 18px; border: none !important; text-align: center; cursor: default; }
     td.cn span { font-size: 9px; color: var(--text-3); }
 
-    /* ── CROCHET MODE ── */
-    .cro-header {
-      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-      margin-bottom: 14px; padding: 13px 16px;
-      background: var(--surface); border: .5px solid var(--border);
-      border-radius: var(--radius);
+    /* crochet cell states */
+    td.gc.cro-cur  { background: var(--cur-l) !important; cursor: pointer; }
+    td.gc.cro-done { background: var(--done-l) !important; }
+    td.gc.cro-fut  { opacity: .18; pointer-events: none; }
+    td.gc.cro-cur.filled  { background: var(--filled) !important; box-shadow: inset 0 0 0 3px var(--cur); }
+    td.gc.cro-done.filled { background: var(--filled) !important; }
+    td.gc.cro-cur.void, td.gc.cro-done.void { opacity: .5; }
+
+    /* ── CROCHET HEADER ── */
+    .cro-bar {
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap;
+      padding: 10px 14px; background: var(--surface); border-bottom: .5px solid var(--border);
     }
-    .row-badge {
-      font-size: 17px; font-weight: 600; color: var(--text); line-height: 1;
-    }
-    .row-badge .tot { font-size: 14px; font-weight: 400; color: var(--text-2); }
+    .row-badge { font-size: 16px; font-weight: 600; color: var(--text); }
+    .row-badge .tot { font-size: 13px; font-weight: 400; color: var(--text-2); }
     .prog-wrap { flex: 1; min-width: 80px; display: flex; align-items: center; gap: 8px; }
     .prog-track { flex: 1; height: 5px; background: var(--border-2); border-radius: 999px; overflow: hidden; }
-    .prog-fill { height: 100%; background: var(--done-row); border-radius: 999px; transition: width .3s ease; }
-    .prog-lbl { font-size: 13px; font-weight: 500; color: var(--done-row); min-width: 32px; text-align: right; }
+    .prog-fill  { height: 100%; background: var(--done); border-radius: 999px; transition: width .3s; }
+    .prog-lbl   { font-size: 13px; font-weight: 500; color: var(--done); min-width: 32px; text-align: right; }
     .nav-btn {
-      background: var(--surface-2); border: .5px solid var(--border-2); border-radius: var(--radius-sm);
-      padding: 7px 14px; font-family: inherit; font-size: 14px; min-height: 36px;
-      color: var(--text-2); cursor: pointer; transition: all .12s; white-space: nowrap;
+      background: var(--surface-2); border: .5px solid var(--border-2); border-radius: var(--rs);
+      padding: 7px 14px; font-family: inherit; font-size: 14px; color: var(--text-2); cursor: pointer; height: 36px;
     }
     .nav-btn:active { opacity: .6; }
-    .rst-btn {
-      background: none; border: none; font-family: inherit; font-size: 13px;
-      color: var(--text-3); cursor: pointer; padding: 4px 0;
-    }
+    .rst-btn { background: none; border: none; font-family: inherit; font-size: 13px; color: var(--text-3); cursor: pointer; }
 
-    /* Crochet cell states */
-    td.gc.cro-cur {
-      background: var(--cur-row-l) !important;
+    /* ── MINIMAP ── */
+    #minimap-wrap {
+      position: absolute;
+      bottom: 12px; right: 12px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      border: .5px solid var(--border-2);
+      border-radius: 8px;
+      padding: 4px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.12);
+      z-index: 20;
+      display: none;
+      cursor: pointer;
     }
-    td.gc.cro-done { background: var(--done-row-l) !important; }
-    td.gc.cro-fut  { opacity: .18; pointer-events: none; }
-    td.gc.cro-cur.filled  { background: var(--filled) !important; box-shadow: inset 0 0 0 3px var(--cur-row); }
-    td.gc.cro-done.filled { background: var(--filled) !important; }
-    td.gc.cro-cur { cursor: pointer; }
-    td.gc.cro-done { cursor: default; }
+    #minimap-wrap.visible { display: block; }
+    #minimap { display: block; border-radius: 5px; }
 
     /* Toast */
     .toast {
-      position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%;
+      position: fixed; bottom: 20px; left: 50%;
       transform: translateX(-50%) translateY(16px);
-      background: rgba(29,29,31,.9);
+      background: rgba(29,29,31,.88);
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      color: #fff;
-      padding: 10px 20px; border-radius: 99px; font-size: 14px;
+      color: #fff; padding: 9px 18px; border-radius: 99px; font-size: 14px;
       opacity: 0; transition: opacity .25s, transform .25s;
       z-index: 999; pointer-events: none; white-space: nowrap;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    @media (max-width: 480px) {
-      .content { padding: 16px 12px 40px; }
-      header { padding: 0 16px; }
-      .logo { font-size: 16px; }
-    }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="header-inner">
-    <div class="logo">Crochet Chart</div>
-    <div class="hdr-actions">
-      <button class="hdr-btn" onclick="exportPNG()">Export PNG</button>
-    </div>
+<!-- FIXED HEADER -->
+<div id="app-header">
+  <div class="logo">Crochet Chart</div>
+  <div class="hdr-right">
+    <div class="hdr-row-badge" id="hdr-row-badge">Row <b id="hdr-cur">1</b> / <span id="hdr-tot">20</span></div>
+    <button class="hdr-btn" onclick="exportPNG()">Export PNG</button>
   </div>
-</header>
+</div>
 
-<div class="tabs">
+<!-- FIXED TABS -->
+<div id="app-tabs">
   <button class="tab-btn active" onclick="switchTab('setup')">Settings</button>
   <button class="tab-btn" onclick="switchTab('pattern')">Pattern</button>
   <button class="tab-btn" onclick="switchTab('crochet')">Work Mode</button>
 </div>
 
-<div class="content">
+<!-- MAIN -->
+<div id="app-main">
 
   <!-- SETTINGS -->
   <div class="panel active" id="panel-setup">
-
     <div class="section-label">Yarn &amp; Hook</div>
     <div class="section-card">
       <div class="form-row">
@@ -461,7 +369,7 @@
 
     <details class="gauge-info">
       <summary>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0">
           <circle cx="8" cy="8" r="7.25" stroke="currentColor" stroke-width="1.5"/>
           <line x1="8" y1="7" x2="8" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           <circle cx="8" cy="4.5" r=".9" fill="currentColor"/>
@@ -475,14 +383,14 @@
         </div>
         <div class="gauge-step">
           <div class="gauge-step-title"><div class="step-num">2</div> Block it</div>
-          Wet blocking is essential for filet: the chain spaces are unstable until blocked and can shrink 10–20%. Lightly wet the swatch (spray bottle, or dip &amp; gently squeeze for cotton). Lay it flat on a foam mat or folded towel, pin the corners first, then stretch to a square shape and pin every 2–3 cm along all edges. Let it dry <b>completely</b> before removing pins — overnight is safest.
+          Wet blocking is essential for filet — the chain spaces are unstable until blocked and can shrink 10–20%. Lightly wet the swatch, lay it flat on a foam mat, pin the corners first, then stretch to a square and pin every 2–3 cm along the edges. Let it dry <b>completely overnight</b> before removing pins.
         </div>
         <div class="gauge-step">
           <div class="gauge-step-title"><div class="step-num">3</div> Measure once dry</div>
-          Lay a ruler flat on the swatch. Count how many <b>filet squares</b> fit in 10 cm horizontally (each square = 1 DC + its space) → enter this as <b>Stitches per 10 cm</b>. Then count how many <b>rows</b> of squares fit in 10 cm vertically → enter as <b>Rows per 10 cm</b>. Measure in the centre of the swatch, away from the edges.
+          Lay a ruler flat on the swatch. Count how many <b>filet squares</b> fit in 10 cm horizontally (each square = 1 DC + its space) → <b>Stitches per 10 cm</b>. Count rows vertically → <b>Rows per 10 cm</b>. Measure in the centre of the swatch.
         </div>
-        <div class="gauge-step" style="color:var(--text-3);font-size:13px">
-          Your yarn label may include a reference gauge — that's a useful starting point, but your own blocked swatch is always more accurate, especially if you crochet tight or loose.
+        <div class="gauge-step" style="font-size:13px;color:var(--text-3)">
+          Your yarn label may include a reference gauge — useful starting point, but your own blocked swatch is always more accurate.
         </div>
       </div>
     </details>
@@ -501,35 +409,43 @@
 
     <div class="info-banner" id="info-proj"></div>
     <button class="btn-primary" onclick="applyFromSettings(); switchTab('pattern')">Create grid →</button>
+    <div style="height:20px"></div>
   </div>
 
   <!-- PATTERN -->
   <div class="panel" id="panel-pattern">
-    <div class="gc-row">
-      <label>Cols</label>
-      <input type="number" id="gcols" value="20" min="2" max="100" onchange="resizeGrid()"/>
-      <label>Rows</label>
-      <input type="number" id="grows" value="20" min="1" max="80" onchange="resizeGrid()"/>
-      <button class="btn-sec" onclick="clearGrid()">Clear</button>
-    </div>
     <div class="toolbar">
-      <button class="tool-btn active" id="btn-fill" onclick="setTool('fill')">
-        <div class="tool-dot"></div> Fill
+      <button class="tool-btn active" id="btn-fill"  onclick="setTool('fill')"><div class="tool-dot"></div> Fill</button>
+      <button class="tool-btn"        id="btn-erase" onclick="setTool('erase')"><div class="tool-empty"></div> Erase</button>
+      <button class="tool-btn"        id="btn-void"  onclick="setTool('void')"><div class="tool-void"></div> No stitch</button>
+      <div class="mode-sep"></div>
+      <button class="pan-btn" id="pan-toggle" onclick="togglePan()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">
+          <path d="M5 1v5.5L3.5 5 2 6.5 5 9.5 8 12.5l1.5-1.5L8 9.5V8h1.5l1-1-1.5-1.5V4l-1-1H7V1H5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="none"/>
+        </svg>
+        Pan
       </button>
-      <button class="tool-btn" id="btn-erase" onclick="setTool('erase')">
-        <div class="tool-empty"></div> Erase
-      </button>
-      <button class="tool-btn" id="btn-void" onclick="setTool('void')">
-        <div class="tool-void"></div> No stitch
-      </button>
-      <span style="margin-left:6px;font-size:13px;color:var(--text-3)">Click or drag</span>
+      <div class="gc-inp">
+        <span>Cols</span>
+        <input type="number" id="gcols" value="20" min="2" max="100" onchange="resizeGrid()"/>
+        <span>Rows</span>
+        <input type="number" id="grows" value="20" min="1" max="80"  onchange="resizeGrid()"/>
+        <button class="btn-sec" onclick="clearGrid()">Clear</button>
+      </div>
     </div>
-    <div class="grid-wrap"><table class="cg" id="pat-grid"></table></div>
+    <div class="grid-area" id="pat-area">
+      <div class="grid-wrap edit-mode" id="pat-wrap">
+        <table class="cg" id="pat-grid"></table>
+      </div>
+      <div id="minimap-wrap" onclick="minimapClick(event)">
+        <canvas id="minimap" width="120" height="90"></canvas>
+      </div>
+    </div>
   </div>
 
   <!-- WORK MODE -->
   <div class="panel" id="panel-crochet">
-    <div class="cro-header">
+    <div class="cro-bar">
       <button class="nav-btn" onclick="prevRow()">← Prev</button>
       <div class="row-badge">Row <span id="cur-num">1</span><span class="tot" id="row-tot"> / 20</span></div>
       <button class="nav-btn" onclick="nextRow()">Next →</button>
@@ -539,7 +455,14 @@
       </div>
       <button class="rst-btn" onclick="resetProgress()">Reset</button>
     </div>
-    <div class="grid-wrap"><table class="cg" id="cro-grid"></table></div>
+    <div class="grid-area" id="cro-area">
+      <div class="grid-wrap edit-mode" id="cro-wrap">
+        <table class="cg" id="cro-grid"></table>
+      </div>
+      <div id="cro-minimap-wrap" onclick="crominimapClick(event)" style="position:absolute;bottom:12px;right:12px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border:.5px solid rgba(0,0,0,.14);border-radius:8px;padding:4px;box-shadow:0 2px 12px rgba(0,0,0,.12);z-index:20;display:none;cursor:pointer">
+        <canvas id="cro-minimap" width="120" height="90"></canvas>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -558,34 +481,30 @@ const YARN = {
 };
 
 const S = {
-  grid: [],
+  grid: [],          // null | true | 'void'
   cols: 20, rows: 20,
   tool: 'fill',
+  panMode: false,
   crRow: 0,
   checked: new Set(),
 };
 
-let isDown = false;
-let dragAction = null; // 'check' | 'uncheck'
+const CELL = 28; // px — fixed, always
+let isDown = false, dragAction = null;
 
-/* ── Grid init ── */
-function initGrid(cols, rows) {
-  S.cols = cols; S.rows = rows;
-  S.grid = Array.from({ length: rows }, () => new Array(cols).fill(null));
-  // null = empty, true = filled, 'void' = no-stitch
+/* ════════ GRID INIT ════════ */
+function initGrid(c, r) {
+  S.cols = c; S.rows = r;
+  S.grid = Array.from({ length: r }, () => new Array(c).fill(null));
 }
-
 function resizeGrid() {
-  const cols = clamp(+v('gcols') || 20, 2, 100);
-  const rows = clamp(+v('grows') || 20, 1, 80);
+  const c = clamp(+v('gcols')||20, 2, 100), r = clamp(+v('grows')||20, 1, 80);
   const og = S.grid, oc = S.cols, or = S.rows;
-  S.cols = cols; S.rows = rows;
-  S.grid = Array.from({ length: rows }, (_, r) =>
-    Array.from({ length: cols }, (_, c) => (r < or && c < oc) ? og[r][c] : null)
-  );
+  S.cols = c; S.rows = r;
+  S.grid = Array.from({ length: r }, (_, ri) =>
+    Array.from({ length: c }, (_, ci) => ri < or && ci < oc ? og[ri][ci] : null));
   renderPatternGrid();
 }
-
 function clearGrid() {
   if (!confirm('Clear the entire pattern?')) return;
   S.grid = Array.from({ length: S.rows }, () => new Array(S.cols).fill(null));
@@ -593,41 +512,45 @@ function clearGrid() {
   showToast('Grid cleared');
 }
 
-/* ── Pattern grid ── */
+/* ════════ PATTERN GRID ════════ */
 function renderPatternGrid() {
   const t = document.getElementById('pat-grid');
   let h = '<tr><td class="rn"></td>';
-  for (let c = 0; c < S.cols; c++)
-    h += `<td class="cn"><span>${c + 1}</span></td>`;
+  for (let c = 0; c < S.cols; c++) h += `<td class="cn"><span>${c+1}</span></td>`;
   h += '</tr>';
-  for (let r = S.rows - 1; r >= 0; r--) {
-    h += `<tr><td class="rn"><span>${r + 1}</span></td>`;
+  for (let r = S.rows-1; r >= 0; r--) {
+    h += `<tr><td class="rn"><span>${r+1}</span></td>`;
     for (let c = 0; c < S.cols; c++) {
       const cell = S.grid[r][c];
-      let cls = 'gc';
-      if (cell === true) cls += ' filled';
-      else if (cell === 'void') cls += ' void';
-      h += `<td class="${cls}" data-r="${r}" data-c="${c}"></td>`;
+      h += `<td class="gc${cell===true?' filled':cell==='void'?' void':''}" data-r="${r}" data-c="${c}"></td>`;
     }
     h += '</tr>';
   }
   t.innerHTML = h;
-  bindPattern(t);
+  bindPattern();
+  updateMinimap('pat');
 }
 
-function bindPattern(t) {
-  t.onmousedown = e => {
+function bindPattern() {
+  const wrap = document.getElementById('pat-wrap');
+  wrap.onmousedown = e => {
+    if (S.panMode) return;
     isDown = true;
-    const td = e.target.closest('.gc[data-r]');
-    if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
+    const td = e.target.closest('.gc[data-r]'); if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
   };
-  t.onmousemove = e => {
-    if (!isDown) return;
-    const td = e.target.closest('.gc[data-r]');
-    if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
+  wrap.onmousemove = e => {
+    if (S.panMode || !isDown) return;
+    const td = e.target.closest('.gc[data-r]'); if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
   };
-  t.ontouchstart = e => { e.preventDefault(); isDown = true; ptTouch(e.touches[0]); };
-  t.ontouchmove  = e => { e.preventDefault(); if (isDown) ptTouch(e.touches[0]); };
+  wrap.ontouchstart = e => {
+    if (S.panMode) return;
+    e.preventDefault(); isDown = true; ptTouch(e.touches[0]);
+  };
+  wrap.ontouchmove = e => {
+    if (S.panMode) return;
+    e.preventDefault(); if (isDown) ptTouch(e.touches[0]);
+  };
+  wrap.onscroll = () => updateMinimap('pat');
 }
 
 function ptTouch(touch) {
@@ -636,89 +559,87 @@ function ptTouch(touch) {
 }
 
 function paintCell(r, c, td) {
-  const t = S.tool;
-  if (t === 'erase') {
-    S.grid[r][c] = null;
-    td.classList.remove('filled', 'void');
-  } else if (t === 'fill') {
-    S.grid[r][c] = true;
-    td.classList.add('filled');
-    td.classList.remove('void');
-  } else if (t === 'void') {
-    S.grid[r][c] = 'void';
-    td.classList.add('void');
-    td.classList.remove('filled');
-  }
+  if (S.tool === 'erase')      { S.grid[r][c] = null;   td.className = 'gc'; }
+  else if (S.tool === 'fill')  { S.grid[r][c] = true;   td.className = 'gc filled'; }
+  else if (S.tool === 'void')  { S.grid[r][c] = 'void'; td.className = 'gc void'; }
+  updateMinimap('pat');
 }
 
-/* ── Crochet grid ── */
-// Row 0 (displayed as row 1) → left-to-right. Row 1 → right-to-left. Alternates.
+function togglePan() {
+  S.panMode = !S.panMode;
+  const wrap = document.getElementById('pat-wrap');
+  wrap.classList.toggle('pan-mode', S.panMode);
+  wrap.classList.toggle('edit-mode', !S.panMode);
+  document.getElementById('pan-toggle').classList.toggle('active', S.panMode);
+  // disable draw tools visually when panning
+  ['btn-fill','btn-erase','btn-void'].forEach(id =>
+    document.getElementById(id).style.opacity = S.panMode ? '.4' : '1'
+  );
+}
+
+/* ════════ CROCHET GRID ════════ */
 function rowDir(r) { return r % 2 === 0 ? 'ltr' : 'rtl'; }
 
-// Arrow SVG pointing in the reading direction
 function arrowSvg(dir) {
-  const d = dir === 'ltr'
-    ? 'M3,8 L13,8 M9,4.5 L13,8 L9,11.5'
-    : 'M13,8 L3,8 M7,4.5 L3,8 L7,11.5';
-  return `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto">
-    <path d="${d}" stroke="#34C759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  const d = dir === 'ltr' ? 'M3,8 L13,8 M9,4 L13,8 L9,12' : 'M13,8 L3,8 M7,4 L3,8 L7,12';
+  return `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:block;margin:auto">
+    <path d="${d}" stroke="#34C759" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>`;
 }
 
 function renderCrochetGrid() {
   const t = document.getElementById('cro-grid');
   let h = '<tr><td class="rn"></td>';
-  for (let c = 0; c < S.cols; c++)
-    h += `<td class="cn"><span>${c + 1}</span></td>`;
+  for (let c = 0; c < S.cols; c++) h += `<td class="cn"><span>${c+1}</span></td>`;
   h += '</tr>';
-
-  for (let r = S.rows - 1; r >= 0; r--) {
-    h += `<tr><td class="rn"><span>${r + 1}</span></td>`;
+  for (let r = S.rows-1; r >= 0; r--) {
+    h += `<tr><td class="rn"><span>${r+1}</span></td>`;
     for (let c = 0; c < S.cols; c++) {
-      const key = `${r},${c}`;
-      const cell = S.grid[r][c];
+      const key = `${r},${c}`, cell = S.grid[r][c], chk = S.checked.has(key);
       let cls = 'gc';
       if (r === S.crRow)    cls += ' cro-cur';
       else if (r < S.crRow) cls += ' cro-done';
       else                  cls += ' cro-fut';
-      if (cell === true)    cls += ' filled';
-      if (cell === 'void')  cls += ' void';
-      const isChk = S.checked.has(key);
-      const inner = (isChk && cell !== 'void') ? arrowSvg(rowDir(r)) : '';
-      h += `<td class="${cls}" data-r="${r}" data-c="${c}">${inner}</td>`;
+      if (cell === true)   cls += ' filled';
+      if (cell === 'void') cls += ' void';
+      h += `<td class="${cls}" data-r="${r}" data-c="${c}">${chk && cell !== 'void' ? arrowSvg(rowDir(r)) : ''}</td>`;
     }
     h += '</tr>';
   }
   t.innerHTML = h;
-  bindCrochet(t);
+  bindCrochet();
   updateCrochetUI();
+  updateMinimap('cro');
+  scrollToCurrentRow();
 }
 
-function bindCrochet(t) {
-  t.onmousedown = e => {
+function scrollToCurrentRow() {
+  const wrap = document.getElementById('cro-wrap');
+  const displayRow = S.rows - 1 - S.crRow; // visual row index from top (rows render top-to-bottom reversed)
+  const targetY = (displayRow + 1) * CELL; // +1 for header row of col numbers
+  const wrapH = wrap.clientHeight;
+  // Center the current row
+  wrap.scrollTop = targetY - wrapH / 2 + CELL / 2;
+}
+
+function bindCrochet() {
+  const wrap = document.getElementById('cro-wrap');
+  wrap.onmousedown = e => {
     isDown = true;
-    const td = e.target.closest('.gc[data-r]');
-    if (!td) return;
+    const td = e.target.closest('.gc[data-r]'); if (!td) return;
     const r = +td.dataset.r, c = +td.dataset.c;
-    // Clicking any non-future row navigates to it
-    if (r > S.crRow) return; // future rows are pointer-events:none anyway
-    if (r !== S.crRow) {
-      S.crRow = r;
-      renderCrochetGrid();
-      return;
-    }
+    if (r > S.crRow) return;
+    if (r !== S.crRow) { S.crRow = r; renderCrochetGrid(); return; }
     dragAction = S.checked.has(`${r},${c}`) ? 'uncheck' : 'check';
     applyCheck(r, c, td);
   };
-  t.onmousemove = e => {
+  wrap.onmousemove = e => {
     if (!isDown || !dragAction) return;
-    const td = e.target.closest('.gc[data-r]');
-    if (!td) return;
-    const r = +td.dataset.r, c = +td.dataset.c;
-    if (r !== S.crRow) return;
+    const td = e.target.closest('.gc[data-r]'); if (!td) return;
+    const r = +td.dataset.r, c = +td.dataset.c; if (r !== S.crRow) return;
     applyCheck(r, c, td);
   };
-  t.ontouchstart = e => {
+  wrap.ontouchstart = e => {
     e.preventDefault(); isDown = true;
     const td = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('#cro-grid .gc[data-r]');
     if (!td) return;
@@ -728,37 +649,31 @@ function bindCrochet(t) {
     dragAction = S.checked.has(`${r},${c}`) ? 'uncheck' : 'check';
     applyCheck(r, c, td);
   };
-  t.ontouchmove = e => {
-    e.preventDefault();
-    if (!isDown || !dragAction) return;
+  wrap.ontouchmove = e => {
+    e.preventDefault(); if (!isDown || !dragAction) return;
     const td = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('#cro-grid .gc[data-r]');
     if (!td) return;
-    const r = +td.dataset.r, c = +td.dataset.c;
-    if (r !== S.crRow) return;
+    const r = +td.dataset.r, c = +td.dataset.c; if (r !== S.crRow) return;
     applyCheck(r, c, td);
   };
+  wrap.onscroll = () => updateMinimap('cro');
 }
 
 function applyCheck(r, c, td) {
+  if (S.grid[r][c] === 'void') return;
   const key = `${r},${c}`;
-  if (S.grid[r][c] === 'void') return; // skip no-stitch cells
   if (dragAction === 'check' && !S.checked.has(key)) {
-    S.checked.add(key);
-    td.innerHTML = arrowSvg(rowDir(r));
-    updateProgress();
-    autoAdvanceCheck();
+    S.checked.add(key); td.innerHTML = arrowSvg(rowDir(r));
+    updateProgress(); autoAdvance();
   } else if (dragAction === 'uncheck' && S.checked.has(key)) {
-    S.checked.delete(key);
-    td.innerHTML = '';
+    S.checked.delete(key); td.innerHTML = '';
     updateProgress();
   }
 }
 
-// Auto-advance: only count non-void cells
-function autoAdvanceCheck() {
+function autoAdvance() {
   const nonVoid = Array.from({ length: S.cols }, (_, c) => S.grid[S.crRow][c] !== 'void');
-  const allChecked = nonVoid.every((ok, c) => !ok || S.checked.has(`${S.crRow},${c}`));
-  if (allChecked && S.crRow < S.rows - 1) {
+  if (nonVoid.every((ok, c) => !ok || S.checked.has(`${S.crRow},${c}`)) && S.crRow < S.rows - 1) {
     setTimeout(() => { S.crRow++; renderCrochetGrid(); showToast(`Row ${S.crRow + 1} ↑`); }, 280);
   }
 }
@@ -766,6 +681,8 @@ function autoAdvanceCheck() {
 function updateCrochetUI() {
   document.getElementById('cur-num').textContent = S.crRow + 1;
   document.getElementById('row-tot').textContent = ` / ${S.rows}`;
+  document.getElementById('hdr-cur').textContent = S.crRow + 1;
+  document.getElementById('hdr-tot').textContent = S.rows;
   updateProgress();
 }
 
@@ -781,112 +698,190 @@ function prevRow() { if (S.crRow > 0) { S.crRow--; renderCrochetGrid(); } }
 function nextRow() { if (S.crRow < S.rows - 1) { S.crRow++; renderCrochetGrid(); } }
 function resetProgress() { S.crRow = 0; S.checked.clear(); renderCrochetGrid(); showToast('Progress reset'); }
 
-/* ── Tool ── */
+/* ════════ TOOL ════════ */
 function setTool(id) {
+  if (S.panMode) { togglePan(); } // exit pan mode when picking a draw tool
   S.tool = id;
-  document.getElementById('btn-fill').classList.toggle('active', id === 'fill');
-  document.getElementById('btn-erase').classList.toggle('active', id === 'erase');
-  document.getElementById('btn-void').classList.toggle('active', id === 'void');
+  ['fill','erase','void'].forEach(t =>
+    document.getElementById('btn-'+t).classList.toggle('active', t === id));
 }
 
-/* ── Settings ── */
-function calcSettings() {
-  const yw  = v('yw');
-  const gst = +v('gst') || 16;
-  const grw = +v('grw') || 18;
-  const pw  = +v('pw')  || 20;
-  const ph  = +v('ph')  || 20;
-  const cols = Math.round(gst / 10 * pw);
-  const rows = Math.round(grw / 10 * ph);
-  document.getElementById('info-proj').innerHTML =
-    `<b>Recommended hook for ${YARN[yw].n}</b>: ${YARN[yw].h} mm &nbsp;·&nbsp; For <b>${pw} × ${ph} cm</b> your grid will be <b>${cols} stitches × ${rows} rows</b> &nbsp;·&nbsp; 1 stitch ≈ ${(10/gst).toFixed(2)} cm`;
-}
+/* ════════ MINIMAP ════════ */
+const MM = { W: 120, H: 90 };
 
-function applyFromSettings() {
-  const gst  = +v('gst') || 16;
-  const grw  = +v('grw') || 18;
-  const pw   = +v('pw')  || 20;
-  const ph   = +v('ph')  || 20;
-  const cols = clamp(Math.round(gst / 10 * pw), 2, 100);
-  const rows = clamp(Math.round(grw / 10 * ph), 1, 80);
-  set('gcols', cols); set('grows', rows);
-  initGrid(cols, rows);
-  renderPatternGrid();
-  showToast(`Grid ${cols} × ${rows} ready`);
-}
+function updateMinimap(which) {
+  const canvasId  = which === 'pat' ? 'minimap' : 'cro-minimap';
+  const wrapId    = which === 'pat' ? 'pat-wrap' : 'cro-wrap';
+  const wrapElId  = which === 'pat' ? 'minimap-wrap' : 'cro-minimap-wrap';
+  const canvas    = document.getElementById(canvasId);
+  const wrap      = document.getElementById(wrapId);
+  const wrapEl    = document.getElementById(wrapElId);
+  if (!canvas || !wrap) return;
 
-/* ── Navigation ── */
-function switchTab(tab) {
-  ['setup','pattern','crochet'].forEach((t, i) => {
-    document.querySelectorAll('.tab-btn')[i].classList.toggle('active', t === tab);
-    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
-  });
-  if (tab === 'crochet') renderCrochetGrid();
-}
+  const gridW = S.cols * CELL + 24; // +24 for row numbers col
+  const gridH = (S.rows + 1) * CELL; // +1 for col numbers row
 
-/* ── Export PNG ── */
-function exportPNG() {
-  const cell = 28, ml = 28, mt = 22, pad = 18;
-  const W = S.cols * cell + ml + pad * 2;
-  const H = S.rows * cell + mt + pad * 2;
-  const canvas = document.createElement('canvas');
-  canvas.width = W * 2; canvas.height = H * 2;
+  // Only show minimap if grid is larger than viewport in either dimension
+  const show = gridW > wrap.clientWidth || gridH > wrap.clientHeight;
+  wrapEl.style.display = show ? 'block' : 'none';
+  if (!show) return;
+
   const ctx = canvas.getContext('2d');
-  ctx.scale(2, 2);
-  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
-  const ox = pad + ml, oy = pad + mt;
+  const scaleX = MM.W / gridW, scaleY = MM.H / gridH;
+  const cellW = CELL * scaleX, cellH = CELL * scaleY;
+  const offX = 24 * scaleX; // row-number column offset
+
+  ctx.clearRect(0, 0, MM.W, MM.H);
+
+  // Background
+  ctx.fillStyle = '#F5F5F7';
+  ctx.fillRect(0, 0, MM.W, MM.H);
+
+  // Draw cells
   for (let r = 0; r < S.rows; r++) {
-    const vr = S.rows - 1 - r;
-    const y = oy + vr * cell;
+    const vr = S.rows - 1 - r; // visual row (top-down in minimap)
+    const y = (vr + 1) * cellH; // +1 for header
     for (let c = 0; c < S.cols; c++) {
-      const x = ox + c * cell;
-      if (S.grid[r][c] === true) {
-        ctx.fillStyle = '#1D1D1F';
-        ctx.fillRect(x + .5, y + .5, cell - 1, cell - 1);
-      } else if (S.grid[r][c] === 'void') {
-        ctx.fillStyle = '#F0F0F2';
-        ctx.fillRect(x + .5, y + .5, cell - 1, cell - 1);
-        ctx.strokeStyle = '#C8C8CC'; ctx.lineWidth = .8;
-        for (let i = -cell; i < cell * 2; i += 5) {
-          ctx.beginPath();
-          ctx.moveTo(x + i, y); ctx.lineTo(x + i + cell, y + cell);
-          ctx.stroke();
-        }
+      const x = offX + c * cellW;
+      const cell = S.grid[r][c];
+      if (which === 'cro') {
+        if (r === S.crRow)      ctx.fillStyle = '#FFF3CC';
+        else if (r < S.crRow)   ctx.fillStyle = '#D4EDDA';
+        else                    ctx.fillStyle = 'rgba(245,245,247,.3)';
       } else {
-        ctx.strokeStyle = '#D1D1D6'; ctx.lineWidth = .5;
-        ctx.strokeRect(x + .25, y + .25, cell - .5, cell - .5);
+        ctx.fillStyle = '#F5F5F7';
+      }
+      ctx.fillRect(x, y, cellW, cellH);
+      if (cell === true) {
+        ctx.fillStyle = '#1D1D1F';
+        ctx.fillRect(x + .5, y + .5, cellW - 1, cellH - 1);
+      } else if (cell === 'void') {
+        ctx.fillStyle = '#C8C8CC';
+        ctx.fillRect(x, y, cellW, cellH);
+      }
+      // checked cells in crochet mode
+      if (which === 'cro' && S.checked.has(`${r},${c}`)) {
+        ctx.fillStyle = '#34C759';
+        ctx.fillRect(x + cellW*.2, y + cellH*.2, cellW*.6, cellH*.6);
       }
     }
   }
-  ctx.font = '9px -apple-system, sans-serif'; ctx.fillStyle = '#AEAEB2';
-  ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
-  for (let r = 0; r < S.rows; r++)
-    ctx.fillText(r + 1, ox - 4, oy + (S.rows - 1 - r) * cell + cell / 2);
-  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  for (let c = 0; c < S.cols; c++)
-    ctx.fillText(c + 1, ox + c * cell + cell / 2, oy - 5);
-  const link = document.createElement('a');
-  link.download = 'crochet-chart.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+
+  // Grid lines
+  ctx.strokeStyle = '#D1D1D6'; ctx.lineWidth = .3;
+  for (let c = 0; c <= S.cols; c++) {
+    ctx.beginPath();
+    ctx.moveTo(offX + c * cellW, cellH);
+    ctx.lineTo(offX + c * cellW, cellH + S.rows * cellH);
+    ctx.stroke();
+  }
+
+  // Viewport rect
+  const vpX = offX + (wrap.scrollLeft / CELL) * cellW;
+  const vpY = (wrap.scrollTop / CELL) * cellH;
+  const vpW = (wrap.clientWidth / CELL) * cellW;
+  const vpH = (wrap.clientHeight / CELL) * cellH;
+
+  ctx.strokeStyle = '#0071E3'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(vpX, vpY, Math.min(vpW, MM.W - vpX), Math.min(vpH, MM.H - vpY));
+  ctx.fillStyle = 'rgba(0,113,227,.08)';
+  ctx.fillRect(vpX, vpY, Math.min(vpW, MM.W - vpX), Math.min(vpH, MM.H - vpY));
+}
+
+function minimapClick(e) {
+  navigateMinimap(e, 'pat-wrap', 'minimap');
+}
+function crominimapClick(e) {
+  navigateMinimap(e, 'cro-wrap', 'cro-minimap');
+}
+function navigateMinimap(e, wrapId, canvasId) {
+  const canvas = document.getElementById(canvasId);
+  const wrap   = document.getElementById(wrapId);
+  const rect   = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  const gridW = S.cols * CELL + 24, gridH = (S.rows + 1) * CELL;
+  const scaleX = MM.W / gridW, scaleY = MM.H / gridH;
+  wrap.scrollLeft = (mx / scaleX) - wrap.clientWidth / 2;
+  wrap.scrollTop  = (my / scaleY) - wrap.clientHeight / 2;
+}
+
+/* ════════ SETTINGS ════════ */
+function calcSettings() {
+  const yw = v('yw'), gst = +v('gst')||16, grw = +v('grw')||18;
+  const pw = +v('pw')||20, ph = +v('ph')||20;
+  const cols = Math.round(gst/10*pw), rows = Math.round(grw/10*ph);
+  document.getElementById('info-proj').innerHTML =
+    `<b>Recommended hook for ${YARN[yw].n}</b>: ${YARN[yw].h} mm &nbsp;·&nbsp; For <b>${pw} × ${ph} cm</b>: <b>${cols} stitches × ${rows} rows</b> &nbsp;·&nbsp; 1 stitch ≈ ${(10/gst).toFixed(2)} cm`;
+}
+function applyFromSettings() {
+  const gst = +v('gst')||16, grw = +v('grw')||18;
+  const pw = +v('pw')||20, ph = +v('ph')||20;
+  const cols = clamp(Math.round(gst/10*pw), 2, 100);
+  const rows = clamp(Math.round(grw/10*ph), 1, 80);
+  set('gcols', cols); set('grows', rows);
+  initGrid(cols, rows); renderPatternGrid();
+  showToast(`Grid ${cols} × ${rows} ready`);
+}
+
+/* ════════ NAV ════════ */
+function switchTab(tab) {
+  ['setup','pattern','crochet'].forEach((t,i) => {
+    document.querySelectorAll('.tab-btn')[i].classList.toggle('active', t===tab);
+    document.getElementById('panel-'+t).classList.toggle('active', t===tab);
+  });
+  document.getElementById('hdr-row-badge').classList.toggle('visible', tab==='crochet');
+  if (tab === 'crochet') renderCrochetGrid();
+  if (tab === 'pattern') { renderPatternGrid(); }
+}
+
+/* ════════ EXPORT PNG ════════ */
+function exportPNG() {
+  const ml=28, mt=22, pad=18;
+  const W = S.cols*CELL + ml + pad*2, H = S.rows*CELL + mt + pad*2;
+  const canvas = document.createElement('canvas');
+  canvas.width = W*2; canvas.height = H*2;
+  const ctx = canvas.getContext('2d'); ctx.scale(2,2);
+  ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
+  const ox=pad+ml, oy=pad+mt;
+  for (let r=0; r<S.rows; r++) {
+    const vr=S.rows-1-r, y=oy+vr*CELL;
+    for (let c=0; c<S.cols; c++) {
+      const x=ox+c*CELL, cell=S.grid[r][c];
+      if (cell===true) { ctx.fillStyle='#1D1D1F'; ctx.fillRect(x+.5,y+.5,CELL-1,CELL-1); }
+      else if (cell==='void') {
+        ctx.fillStyle='#EBEBED'; ctx.fillRect(x+.5,y+.5,CELL-1,CELL-1);
+        ctx.strokeStyle='#C8C8CC'; ctx.lineWidth=.8;
+        ctx.save(); ctx.rect(x,y,CELL,CELL); ctx.clip();
+        for (let i=-CELL; i<CELL*2; i+=5) { ctx.beginPath(); ctx.moveTo(x+i,y); ctx.lineTo(x+i+CELL,y+CELL); ctx.stroke(); }
+        ctx.restore();
+      } else { ctx.strokeStyle='#D1D1D6'; ctx.lineWidth=.5; ctx.strokeRect(x+.25,y+.25,CELL-.5,CELL-.5); }
+    }
+  }
+  ctx.font='9px sans-serif'; ctx.fillStyle='#AEAEB2';
+  ctx.textBaseline='middle'; ctx.textAlign='right';
+  for (let r=0; r<S.rows; r++) ctx.fillText(r+1, ox-4, oy+(S.rows-1-r)*CELL+CELL/2);
+  ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  for (let c=0; c<S.cols; c++) ctx.fillText(c+1, ox+c*CELL+CELL/2, oy-5);
+  const a=document.createElement('a'); a.download='crochet-chart.png'; a.href=canvas.toDataURL(); a.click();
   showToast('Exported!');
 }
 
-/* ── Utils ── */
-function v(id) { return document.getElementById(id)?.value; }
-function set(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
-function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
+/* ════════ UTILS ════════ */
+const v   = id => document.getElementById(id)?.value;
+const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val; };
+const clamp = (n,min,max) => Math.min(max,Math.max(min,n));
+
 function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 2000);
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2000);
 }
 
-document.addEventListener('mouseup',  () => { isDown = false; dragAction = null; });
-document.addEventListener('touchend', () => { isDown = false; dragAction = null; });
+document.addEventListener('mouseup',  () => { isDown=false; dragAction=null; });
+document.addEventListener('touchend', () => { isDown=false; dragAction=null; });
 
-initGrid(20, 20);
+/* ════════ INIT ════════ */
+initGrid(20,20);
 renderPatternGrid();
 calcSettings();
 </script>
