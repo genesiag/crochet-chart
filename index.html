@@ -27,6 +27,7 @@
   --hh:       52px;
   --th:       44px;
   --sbw:      272px; /* sidebar width */
+  --cs:       28px;  /* cell size — updated by zoom */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
@@ -172,7 +173,11 @@ details.gi[open] summary{border-radius:var(--r) var(--r) 0 0;border-bottom:.5px 
 .t-sep{width:.5px;height:22px;background:var(--border2);margin:0 2px;flex-shrink:0}
 .pan-btn{display:flex;align-items:center;gap:5px;padding:6px 11px;height:34px;border:.5px solid var(--border2);border-radius:var(--rs);background:var(--sf2);font-family:inherit;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .12s}
 .pan-btn.active{background:#FFF3CC;border-color:var(--cur);color:#8A4800}
-.gc-inp{display:flex;align-items:center;gap:5px;margin-left:auto;font-size:13px;color:var(--text2)}
+.zoom-grp{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.zoom-btn{width:28px;height:28px;border:.5px solid var(--border2);border-radius:6px;background:var(--sf2);font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-family:inherit}
+.zoom-btn:active{opacity:.6}
+.zoom-lbl{font-size:12px;color:var(--text2);min-width:34px;text-align:center;font-variant-numeric:tabular-nums}
+
 .gc-inp input[type=number]{width:52px;padding:5px 7px;font-size:13px;text-align:center;background:var(--sf2);border:.5px solid var(--border2);border-radius:var(--rs);font-family:inherit;color:var(--text);-moz-appearance:textfield;appearance:none}
 .gc-inp input::-webkit-outer-spin-button,.gc-inp input::-webkit-inner-spin-button{-webkit-appearance:none}
 .btn-sec{background:none;border:.5px solid var(--border2);border-radius:var(--rs);padding:6px 11px;font-family:inherit;font-size:13px;color:var(--text2);cursor:pointer;height:34px;white-space:nowrap}
@@ -180,24 +185,31 @@ details.gi[open] summary{border-radius:var(--r) var(--r) 0 0;border-bottom:.5px 
 
 /* ── GRID ── */
 .grid-area{flex:1;overflow:hidden;position:relative}
-.grid-wrap{position:absolute;inset:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.grid-wrap{position:absolute;inset:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:10px}
 .grid-wrap.edit-mode{touch-action:none;cursor:crosshair}
 .grid-wrap.pan-mode{touch-action:pan-x pan-y;cursor:grab}
 .grid-wrap.pan-mode:active{cursor:grabbing}
 table.cg{border-collapse:collapse;width:max-content;background:var(--surface)}
-td.gc{width:28px;height:28px;border:.5px solid var(--gridb);padding:0;vertical-align:middle;text-align:center}
+td.gc{width:var(--cs);height:var(--cs);border:.5px solid var(--gridb);padding:0;vertical-align:middle;text-align:center}
 td.gc.filled{background:var(--filled)}
 td.gc.void{background:repeating-linear-gradient(45deg,#D8D8DC 0,#D8D8DC 2px,#EBEBED 2px,#EBEBED 6px)!important}
-td.rn{width:24px;border:none!important;padding:0 3px 0 6px;cursor:default;text-align:right}
-td.rn span{font-size:9px;color:var(--text3);line-height:28px;display:block}
-td.cn{width:28px;height:18px;border:none!important;text-align:center;cursor:default}
+td.rn{width:22px;border:none!important;padding:0 3px 0 4px;cursor:default;text-align:right;height:var(--cs)}
+td.rn span{font-size:9px;color:var(--text3);display:block;line-height:var(--cs)}
+td.cn{width:var(--cs);height:16px;border:none!important;text-align:center;cursor:default}
 td.cn span{font-size:9px;color:var(--text3)}
+/* hide numbers when zoomed out */
+table.cg.hide-nums td.rn{width:6px;padding:0}
+table.cg.hide-nums td.rn span,table.cg.hide-nums td.cn span{display:none}
+table.cg.hide-nums td.cn{height:4px}
 td.gc.cro-cur{background:var(--cur-l)!important;cursor:pointer}
 td.gc.cro-done{background:var(--done-l)!important}
 td.gc.cro-fut{opacity:.18;pointer-events:none}
 td.gc.cro-cur.filled{background:var(--filled)!important}
 td.gc.cro-done.filled{background:var(--filled)!important}
-td.gc.cro-cur.void,td.gc.cro-done.void{opacity:.5}
+/* void cells in work mode — strong diagonal with row-color tint */
+td.gc.cro-cur.void{background:repeating-linear-gradient(45deg,#B89000 0,#B89000 2.5px,var(--cur-l) 2.5px,var(--cur-l) 7px)!important;opacity:1}
+td.gc.cro-done.void{background:repeating-linear-gradient(45deg,#5A7A60 0,#5A7A60 2.5px,var(--done-l) 2.5px,var(--done-l) 7px)!important;opacity:1}
+td.gc.cro-fut.void{opacity:.18}
 
 /* ── CROCHET BAR ── */
 .cro-bar{display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;padding:10px 12px;background:var(--surface);border-bottom:.5px solid var(--border)}
@@ -327,9 +339,15 @@ td.gc.cro-cur.void,td.gc.cro-done.void{opacity:.5}
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M5 1v5.5L3.5 5 2 6.5 5 9.5 8 12.5l1.5-1.5L8 9.5V8h1.5l1-1-1.5-1.5V4l-1-1H7V1H5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
         Pan
       </button>
+      <div class="t-sep"></div>
+      <div class="zoom-grp">
+        <button class="zoom-btn" onclick="zoomOut()" title="Zoom out">−</button>
+        <span class="zoom-lbl" id="zoom-lbl">100%</span>
+        <button class="zoom-btn" onclick="zoomIn()" title="Zoom in">+</button>
+      </div>
       <div class="gc-inp">
-        <span>Cols</span><input type="number" id="gcols" value="20" min="2" max="100" onchange="resizeGrid()"/>
-        <span>Rows</span><input type="number" id="grows" value="20" min="1" max="80"  onchange="resizeGrid()"/>
+        <span>Cols</span><input type="number" id="gcols" value="20" min="2" max="200" onchange="resizeGrid()"/>
+        <span>Rows</span><input type="number" id="grows" value="20" min="1" max="200"  onchange="resizeGrid()"/>
         <button class="btn-sec" onclick="clearGrid()">Clear</button>
       </div>
     </div>
@@ -370,6 +388,26 @@ td.gc.cro-cur.void,td.gc.cro-done.void{opacity:.5}
 /* ════ CONSTANTS ════ */
 const YARN={lace:{h:'1.5–2.25',n:'Thread/Lace'},fingering:{h:'2.25–3.5',n:'Extra Fine'},sport:{h:'3.5–4.5',n:'Fine'},dk:{h:'4.5–5.5',n:'Light'},worsted:{h:'5.5–6.5',n:'Medium'},bulky:{h:'6.5–9',n:'Bulky'},superb:{h:'9+',n:'Extra Bulky'}};
 const CELL=28, MM={W:180,H:135};
+const ZOOM_STEPS=[10,14,18,22,28,36,44];
+let cellSz=28;
+
+function zoomIn(){
+  const idx=ZOOM_STEPS.indexOf(cellSz);
+  if(idx<ZOOM_STEPS.length-1)setZoom(ZOOM_STEPS[idx+1]);
+}
+function zoomOut(){
+  const idx=ZOOM_STEPS.indexOf(cellSz);
+  if(idx>0)setZoom(ZOOM_STEPS[idx-1]);
+}
+function setZoom(sz){
+  cellSz=sz;
+  document.documentElement.style.setProperty('--cs',sz+'px');
+  document.getElementById('zoom-lbl').textContent=Math.round(sz/CELL*100)+'%';
+  // toggle hide-nums on both grids
+  const hide=sz<18;
+  ['pat-grid','cro-grid'].forEach(id=>{const t=document.getElementById(id);if(t)t.classList.toggle('hide-nums',hide);});
+  updateMinimap('pat');updateMinimap('cro');
+}
 
 /* ════ PROJECT STORAGE ════ */
 function loadProjects(){try{return JSON.parse(localStorage.getItem('cc-projects')||'[]')}catch{return[]}}
@@ -626,8 +664,8 @@ function renderCrochetGrid(){
 function scrollToCurRow(){
   const wrap=document.getElementById('cro-wrap');
   const displayRow=S.rows-1-S.crRow;
-  const targetY=(displayRow+1)*CELL;
-  wrap.scrollTop=targetY-wrap.clientHeight/2+CELL/2;
+  const targetY=(displayRow+1)*cellSz;
+  wrap.scrollTop=targetY-wrap.clientHeight/2+cellSz/2;
 }
 
 function bindCrochet(){
@@ -706,37 +744,68 @@ function updateMinimap(which){
   const cid=which==='pat'?'pat-mm':'cro-mm',wid=which==='pat'?'pat-wrap':'cro-wrap',mid=which==='pat'?'pat-mm-wrap':'cro-mm-wrap',rid=which==='pat'?'pat-mm-restore':'cro-mm-restore';
   const canvas=document.getElementById(cid),wrap=document.getElementById(wid),mmWrap=document.getElementById(mid),rst=document.getElementById(rid);
   if(!canvas||!wrap)return;
-  const gridW=S.cols*CELL+24,gridH=(S.rows+1)*CELL;
+
+  // Grid pixel dimensions (at current zoom)
+  const rnW=document.querySelector('table.cg.hide-nums')?6:22; // row-num col width
+  const gridW=S.cols*cellSz+rnW, gridH=(S.rows+1)*cellSz+16; // +16 for cn header row
+
   const show=gridW>wrap.clientWidth||gridH>wrap.clientHeight;
   const userHid=rst.classList.contains('visible');
   mmWrap.classList.toggle('visible',show&&!userHid);
   if(!show){rst.classList.remove('visible');return;}
-  const ctx=canvas.getContext('2d'),sx=MM.W/gridW,sy=MM.H/gridH,cw=CELL*sx,ch=CELL*sy,ox=24*sx;
-  ctx.clearRect(0,0,MM.W,MM.H);ctx.fillStyle='#F5F5F7';ctx.fillRect(0,0,MM.W,MM.H);
+
+  const ctx=canvas.getContext('2d');
+  // Uniform scale — preserve aspect ratio, fit within MM box
+  const scale=Math.min(MM.W/gridW, MM.H/gridH);
+  const drawW=gridW*scale, drawH=gridH*scale;
+  const offX=(MM.W-drawW)/2, offY=(MM.H-drawH)/2; // center in canvas
+
+  const cw=cellSz*scale, ch=cellSz*scale;
+  const rnOff=rnW*scale; // row-number column offset in minimap
+
+  ctx.clearRect(0,0,MM.W,MM.H);
+  ctx.fillStyle='#E8E8EC'; ctx.fillRect(0,0,MM.W,MM.H); // outer bg
+  ctx.fillStyle='#F5F5F7'; ctx.fillRect(offX,offY,drawW,drawH); // grid bg
+
   for(let r=0;r<S.rows;r++){
-    const vr=S.rows-1-r,y=(vr+1)*ch;
+    const vr=S.rows-1-r, y=offY+(vr+1)*ch; // +1 for cn header
     for(let c=0;c<S.cols;c++){
-      const x=ox+c*cw,cell=S.grid[r][c];
-      ctx.fillStyle=which==='cro'?(r===S.crRow?'#FFF3CC':r<S.crRow?'#D4EDDA':'rgba(245,245,247,.25)'):'#FFFFFF';
-      ctx.fillRect(x,y,cw,ch);
+      const x=offX+rnOff+c*cw, cell=S.grid[r][c];
+      if(which==='cro'){
+        ctx.fillStyle=r===S.crRow?'#FFF3CC':r<S.crRow?'#D4EDDA':'rgba(245,245,247,.4)';
+        ctx.fillRect(x,y,cw,ch);
+      }
       if(cell===true){ctx.fillStyle='#1D1D1F';ctx.fillRect(x+.5,y+.5,cw-1,ch-1);}
       else if(cell==='void'){ctx.fillStyle='#C8C8CC';ctx.fillRect(x,y,cw,ch);}
       if(which==='cro'&&S.checked.has(`${r},${c}`)){ctx.fillStyle='#34C759';ctx.fillRect(x+cw*.2,y+ch*.2,cw*.6,ch*.6);}
     }
   }
+  // Grid lines
   ctx.strokeStyle='#D1D1D6';ctx.lineWidth=.3;
-  for(let c=0;c<=S.cols;c++){ctx.beginPath();ctx.moveTo(ox+c*cw,ch);ctx.lineTo(ox+c*cw,ch+S.rows*ch);ctx.stroke();}
-  const vpX=ox+(wrap.scrollLeft/CELL)*cw,vpY=(wrap.scrollTop/CELL)*ch;
-  const vpW=Math.min((wrap.clientWidth/CELL)*cw,MM.W-vpX),vpH=Math.min((wrap.clientHeight/CELL)*ch,MM.H-vpY);
-  ctx.fillStyle='rgba(0,113,227,.08)';ctx.fillRect(vpX,vpY,vpW,vpH);
+  for(let c=0;c<=S.cols;c++){ctx.beginPath();ctx.moveTo(offX+rnOff+c*cw,offY+ch);ctx.lineTo(offX+rnOff+c*cw,offY+ch+S.rows*ch);ctx.stroke();}
+  for(let r=0;r<=S.rows;r++){ctx.beginPath();ctx.moveTo(offX+rnOff,offY+ch+r*ch);ctx.lineTo(offX+rnOff+S.cols*cw,offY+ch+r*ch);ctx.stroke();}
+
+  // Viewport rect (map scroll position to minimap coords)
+  const vpX=offX+rnOff+(wrap.scrollLeft/cellSz)*cw;
+  const vpY=offY+(wrap.scrollTop/cellSz)*ch;
+  const vpW=Math.min((wrap.clientWidth/cellSz)*cw, drawW-(vpX-offX));
+  const vpH=Math.min((wrap.clientHeight/cellSz)*ch, drawH-(vpY-offY));
+  ctx.fillStyle='rgba(0,113,227,.1)';ctx.fillRect(vpX,vpY,vpW,vpH);
   ctx.strokeStyle='#0071E3';ctx.lineWidth=1.5;ctx.strokeRect(vpX,vpY,vpW,vpH);
 }
+
 function minimapClick(e,which){
   const cid=which==='pat'?'pat-mm':'cro-mm',wid=which==='pat'?'pat-wrap':'cro-wrap';
   const canvas=document.getElementById(cid),wrap=document.getElementById(wid);
   const rect=canvas.getBoundingClientRect();
-  wrap.scrollLeft=((e.clientX-rect.left)/MM.W)*(S.cols*CELL+24)-wrap.clientWidth/2;
-  wrap.scrollTop=((e.clientY-rect.top)/MM.H)*((S.rows+1)*CELL)-wrap.clientHeight/2;
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const rnW=document.querySelector('table.cg.hide-nums')?6:22;
+  const gridW=S.cols*cellSz+rnW, gridH=(S.rows+1)*cellSz+16;
+  const scale=Math.min(MM.W/gridW,MM.H/gridH);
+  const drawW=gridW*scale,drawH=gridH*scale;
+  const offX=(MM.W-drawW)/2,offY=(MM.H-drawH)/2;
+  wrap.scrollLeft=((mx-offX)/scale)-wrap.clientWidth/2;
+  wrap.scrollTop =((my-offY)/scale)-wrap.clientHeight/2;
 }
 function hideMap(w){document.getElementById(w==='pat'?'pat-mm-wrap':'cro-mm-wrap').classList.remove('visible');document.getElementById(w==='pat'?'pat-mm-restore':'cro-mm-restore').classList.add('visible');}
 function showMap(w){document.getElementById(w==='pat'?'pat-mm-restore':'cro-mm-restore').classList.remove('visible');updateMinimap(w);}
