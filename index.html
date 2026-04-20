@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Crochet Chart</title>
+  <style>
+    :root {
+      --bg:          #F5F5F7;
+      --surface:     #FFFFFF;
+      --surface-2:   #F5F5F7;
+      --accent:      #0071E3;
+      --accent-l:    #E8F0FD;
+      --text:        #1D1D1F;
+      --text-2:      #6E6E73;
+      --text-3:      #AEAEB2;
+      --border:      rgba(0,0,0,.08);
+      --border-2:    rgba(0,0,0,.14);
+      --grid-b:      #D1D1D6;
+      --filled:      #1D1D1F;
+      --cur-row-l:   #FFF3CC;
+      --cur-row:     #FF9F0A;
+      --done-row-l:  #D4EDDA;
+      --done-row:    #34C759;
+      --radius:      12px;
+      --radius-sm:   8px;
+    }
+
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: rgba(245,245,247,.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: .5px solid var(--border-2);
+      padding: 0 20px;
+      padding-top: env(safe-area-inset-top);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 52px;
+    }
+    .logo {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.01em;
+    }
+    .hdr-actions { margin-left: auto; display: flex; gap: 8px; }
+    .hdr-btn {
+      background: var(--surface-2);
+      border: none;
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 13px;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: opacity .15s;
+      white-space: nowrap;
+    }
+    .hdr-btn:active { opacity: .6; }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      background: var(--bg);
+      padding: 10px 16px 0;
+      gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 8px 14px 10px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-2);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color .15s;
+      flex-shrink: 0;
+    }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+    /* ── CONTENT ── */
+    .content { padding: 20px 16px 40px; max-width: 900px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── FORM ── */
+    .section-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 0;
+      margin-bottom: 14px;
+      overflow: hidden;
+      border: .5px solid var(--border);
+    }
+    .form-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border-bottom: .5px solid var(--border);
+    }
+    .form-row:last-child { border-bottom: none; }
+    .form-row label {
+      font-size: 15px;
+      color: var(--text);
+      flex: 1;
+      min-width: 0;
+    }
+    .form-row input[type=number],
+    .form-row select {
+      background: var(--surface-2);
+      border: .5px solid var(--border-2);
+      border-radius: var(--radius-sm);
+      padding: 7px 10px;
+      font-family: inherit;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      width: 100px;
+      text-align: right;
+      -moz-appearance: textfield;
+      appearance: none;
+      flex-shrink: 0;
+    }
+    .form-row select {
+      width: 150px;
+      text-align: left;
+      padding-right: 8px;
+    }
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .form-row input:focus, .form-row select:focus { border-color: var(--accent); }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 6px 16px 4px;
+      margin-top: 18px;
+      margin-bottom: 2px;
+    }
+
+    .info-banner {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 13px 16px;
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.8;
+      margin-bottom: 14px;
+      border: .5px solid var(--border);
+    }
+    .info-banner b { color: var(--text); font-weight: 500; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 22px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn-primary:active { opacity: .8; transform: scale(.99); }
+
+    /* ── GAUGE INFO ── */
+    details.gauge-info { margin-bottom: 14px; }
+    details.gauge-info summary {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 16px;
+      background: var(--surface);
+      border: .5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+      transition: background .15s;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    details.gauge-info summary::-webkit-details-marker { display: none; }
+    details.gauge-info summary:active { background: var(--surface-2); }
+    details.gauge-info[open] summary { border-radius: var(--radius) var(--radius) 0 0; border-bottom: .5px solid var(--border); }
+    .gauge-body {
+      background: var(--surface);
+      border: .5px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 0;
+      overflow: hidden;
+    }
+    .gauge-step {
+      padding: 14px 16px;
+      border-bottom: .5px solid var(--border);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-2);
+    }
+    .gauge-step:last-child { border-bottom: none; }
+    .gauge-step-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: .02em;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .step-num {
+      width: 20px; height: 20px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .gauge-step b { color: var(--text); font-weight: 500; }
+
+    /* ── PATTERN TAB ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: .5px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .tool-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 7px 14px; min-height: 36px;
+      border: .5px solid var(--border-2); border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      color: var(--text-2); cursor: pointer;
+      transition: all .12s;
+      white-space: nowrap;
+    }
+    .tool-btn.active { background: var(--accent-l); border-color: var(--accent); color: var(--accent); }
+    .tool-btn:active:not(.active) { opacity: .7; }
+    .tool-dot { width: 14px; height: 14px; border-radius: 3px; background: var(--filled); flex-shrink: 0; }
+    .tool-empty { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--border-2); flex-shrink: 0; }
+    .tool-void {
+      width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        #D1D1D6 0px, #D1D1D6 2px,
+        #F0F0F2 2px, #F0F0F2 5px
+      );
+    }
+    /* void cells in the grid */
+    td.gc.void {
+      background: repeating-linear-gradient(
+        45deg,
+        #E8E8EC 0px, #E8E8EC 2.5px,
+        #F5F5F7 2.5px, #F5F5F7 6px
+      ) !important;
+      cursor: default;
+    }
+    td.gc.void.cro-cur, td.gc.void.cro-done, td.gc.void.cro-fut {
+      opacity: .5;
+    }
+
+    .gc-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .gc-row label { font-size: 14px; color: var(--text-2); }
+    .gc-row input[type=number] { width: 62px; padding: 7px 10px; font-size: 14px; text-align: center; }
+    .gc-row .btn-sec { margin-left: auto; }
+
+    .btn-sec {
+      background: none;
+      border: .5px solid var(--border-2);
+      border-radius: var(--radius-sm);
+      padding: 7px 13px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: color .15s;
+      min-height: 36px;
+    }
+    .btn-sec:active { opacity: .6; }
+
+    /* ── GRID ── */
+    .grid-wrap {
+      overflow: auto;
+      display: block;
+      width: 100%;
+      border: .5px solid var(--border-2);
+      border-radius: var(--radius);
+      cursor: crosshair;
+      user-select: none;
+      -webkit-user-select: none;
+      background: var(--surface);
+      -webkit-overflow-scrolling: touch;
+    }
+    table.cg { border-collapse: collapse; background: var(--surface); width: max-content; }
+    td.gc {
+      width: 28px; height: 28px;
+      border: .5px solid var(--grid-b);
+      padding: 0; vertical-align: middle; text-align: center;
+    }
+    td.gc.filled { background: var(--filled); }
+    td.rn { width: 24px; border: none !important; padding: 0 3px 0 4px; cursor: default; text-align: right; }
+    td.rn span { font-size: 9px; color: var(--text-3); line-height: 28px; display: block; }
+    td.cn { width: 28px; height: 18px; border: none !important; text-align: center; cursor: default; }
+    td.cn span { font-size: 9px; color: var(--text-3); }
+
+    /* ── CROCHET MODE ── */
+    .cro-header {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 14px; padding: 13px 16px;
+      background: var(--surface); border: .5px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .row-badge {
+      font-size: 17px; font-weight: 600; color: var(--text); line-height: 1;
+    }
+    .row-badge .tot { font-size: 14px; font-weight: 400; color: var(--text-2); }
+    .prog-wrap { flex: 1; min-width: 80px; display: flex; align-items: center; gap: 8px; }
+    .prog-track { flex: 1; height: 5px; background: var(--border-2); border-radius: 999px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--done-row); border-radius: 999px; transition: width .3s ease; }
+    .prog-lbl { font-size: 13px; font-weight: 500; color: var(--done-row); min-width: 32px; text-align: right; }
+    .nav-btn {
+      background: var(--surface-2); border: .5px solid var(--border-2); border-radius: var(--radius-sm);
+      padding: 7px 14px; font-family: inherit; font-size: 14px; min-height: 36px;
+      color: var(--text-2); cursor: pointer; transition: all .12s; white-space: nowrap;
+    }
+    .nav-btn:active { opacity: .6; }
+    .rst-btn {
+      background: none; border: none; font-family: inherit; font-size: 13px;
+      color: var(--text-3); cursor: pointer; padding: 4px 0;
+    }
+
+    /* Crochet cell states */
+    td.gc.cro-cur {
+      background: var(--cur-row-l) !important;
+    }
+    td.gc.cro-done { background: var(--done-row-l) !important; }
+    td.gc.cro-fut  { opacity: .18; pointer-events: none; }
+    td.gc.cro-cur.filled  { background: var(--filled) !important; box-shadow: inset 0 0 0 3px var(--cur-row); }
+    td.gc.cro-done.filled { background: var(--filled) !important; }
+    td.gc.cro-cur { cursor: pointer; }
+    td.gc.cro-done { cursor: default; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(29,29,31,.9);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      color: #fff;
+      padding: 10px 20px; border-radius: 99px; font-size: 14px;
+      opacity: 0; transition: opacity .25s, transform .25s;
+      z-index: 999; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 480px) {
+      .content { padding: 16px 12px 40px; }
+      header { padding: 0 16px; }
+      .logo { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">Crochet Chart</div>
+    <div class="hdr-actions">
+      <button class="hdr-btn" onclick="exportPNG()">Export PNG</button>
+    </div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('setup')">Settings</button>
+  <button class="tab-btn" onclick="switchTab('pattern')">Pattern</button>
+  <button class="tab-btn" onclick="switchTab('crochet')">Work Mode</button>
+</div>
+
+<div class="content">
+
+  <!-- SETTINGS -->
+  <div class="panel active" id="panel-setup">
+
+    <div class="section-label">Yarn &amp; Hook</div>
+    <div class="section-card">
+      <div class="form-row">
+        <label>Yarn weight</label>
+        <select id="yw" onchange="calcSettings()">
+          <option value="lace">Thread / Lace</option>
+          <option value="fingering">Extra Fine</option>
+          <option value="sport">Fine</option>
+          <option value="dk">Light</option>
+          <option value="worsted" selected>Medium</option>
+          <option value="bulky">Bulky</option>
+          <option value="superb">Extra Bulky</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Hook size (mm)</label>
+        <input type="number" id="hs" value="5" min=".5" max="25" step=".5" oninput="calcSettings()"/>
+      </div>
+    </div>
+
+    <div class="section-label">Gauge</div>
+    <div class="section-card">
+      <div class="form-row">
+        <label>Stitches per 10 cm</label>
+        <input type="number" id="gst" value="16" min="1" max="80" oninput="calcSettings()"/>
+      </div>
+      <div class="form-row">
+        <label>Rows per 10 cm</label>
+        <input type="number" id="grw" value="18" min="1" max="80" oninput="calcSettings()"/>
+      </div>
+    </div>
+
+    <details class="gauge-info">
+      <summary>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <circle cx="8" cy="8" r="7.25" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="8" y1="7" x2="8" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="8" cy="4.5" r=".9" fill="currentColor"/>
+        </svg>
+        How to make, block &amp; measure your gauge
+      </summary>
+      <div class="gauge-body">
+        <div class="gauge-step">
+          <div class="gauge-step-title"><div class="step-num">1</div> Make the swatch in filet stitch</div>
+          Crochet a swatch at least <b>20 × 20 cm</b> using <b>your actual yarn and hook</b>. Work in filet mesh: <b>1 double crochet, chain 2</b> for open squares, or <b>3 double crochet</b> for filled squares. Do not use single crochet — filet gauge is completely different.
+        </div>
+        <div class="gauge-step">
+          <div class="gauge-step-title"><div class="step-num">2</div> Block it</div>
+          Wet blocking is essential for filet: the chain spaces are unstable until blocked and can shrink 10–20%. Lightly wet the swatch (spray bottle, or dip &amp; gently squeeze for cotton). Lay it flat on a foam mat or folded towel, pin the corners first, then stretch to a square shape and pin every 2–3 cm along all edges. Let it dry <b>completely</b> before removing pins — overnight is safest.
+        </div>
+        <div class="gauge-step">
+          <div class="gauge-step-title"><div class="step-num">3</div> Measure once dry</div>
+          Lay a ruler flat on the swatch. Count how many <b>filet squares</b> fit in 10 cm horizontally (each square = 1 DC + its space) → enter this as <b>Stitches per 10 cm</b>. Then count how many <b>rows</b> of squares fit in 10 cm vertically → enter as <b>Rows per 10 cm</b>. Measure in the centre of the swatch, away from the edges.
+        </div>
+        <div class="gauge-step" style="color:var(--text-3);font-size:13px">
+          Your yarn label may include a reference gauge — that's a useful starting point, but your own blocked swatch is always more accurate, especially if you crochet tight or loose.
+        </div>
+      </div>
+    </details>
+
+    <div class="section-label">Project size</div>
+    <div class="section-card">
+      <div class="form-row">
+        <label>Width (cm)</label>
+        <input type="number" id="pw" value="20" min="1" max="300" oninput="calcSettings()"/>
+      </div>
+      <div class="form-row">
+        <label>Height (cm)</label>
+        <input type="number" id="ph" value="20" min="1" max="300" oninput="calcSettings()"/>
+      </div>
+    </div>
+
+    <div class="info-banner" id="info-proj"></div>
+    <button class="btn-primary" onclick="applyFromSettings(); switchTab('pattern')">Create grid →</button>
+  </div>
+
+  <!-- PATTERN -->
+  <div class="panel" id="panel-pattern">
+    <div class="gc-row">
+      <label>Cols</label>
+      <input type="number" id="gcols" value="20" min="2" max="100" onchange="resizeGrid()"/>
+      <label>Rows</label>
+      <input type="number" id="grows" value="20" min="1" max="80" onchange="resizeGrid()"/>
+      <button class="btn-sec" onclick="clearGrid()">Clear</button>
+    </div>
+    <div class="toolbar">
+      <button class="tool-btn active" id="btn-fill" onclick="setTool('fill')">
+        <div class="tool-dot"></div> Fill
+      </button>
+      <button class="tool-btn" id="btn-erase" onclick="setTool('erase')">
+        <div class="tool-empty"></div> Erase
+      </button>
+      <button class="tool-btn" id="btn-void" onclick="setTool('void')">
+        <div class="tool-void"></div> No stitch
+      </button>
+      <span style="margin-left:6px;font-size:13px;color:var(--text-3)">Click or drag</span>
+    </div>
+    <div class="grid-wrap"><table class="cg" id="pat-grid"></table></div>
+  </div>
+
+  <!-- WORK MODE -->
+  <div class="panel" id="panel-crochet">
+    <div class="cro-header">
+      <button class="nav-btn" onclick="prevRow()">← Prev</button>
+      <div class="row-badge">Row <span id="cur-num">1</span><span class="tot" id="row-tot"> / 20</span></div>
+      <button class="nav-btn" onclick="nextRow()">Next →</button>
+      <div class="prog-wrap">
+        <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+        <span class="prog-lbl" id="prog-lbl">0%</span>
+      </div>
+      <button class="rst-btn" onclick="resetProgress()">Reset</button>
+    </div>
+    <div class="grid-wrap"><table class="cg" id="cro-grid"></table></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const YARN = {
+  lace:     { h:'1.5–2.25', n:'Thread / Lace' },
+  fingering:{ h:'2.25–3.5', n:'Extra Fine' },
+  sport:    { h:'3.5–4.5',  n:'Fine' },
+  dk:       { h:'4.5–5.5',  n:'Light' },
+  worsted:  { h:'5.5–6.5',  n:'Medium' },
+  bulky:    { h:'6.5–9',    n:'Bulky' },
+  superb:   { h:'9+',       n:'Extra Bulky' },
+};
+
+const S = {
+  grid: [],
+  cols: 20, rows: 20,
+  tool: 'fill',
+  crRow: 0,
+  checked: new Set(),
+};
+
+let isDown = false;
+let dragAction = null; // 'check' | 'uncheck'
+
+/* ── Grid init ── */
+function initGrid(cols, rows) {
+  S.cols = cols; S.rows = rows;
+  S.grid = Array.from({ length: rows }, () => new Array(cols).fill(null));
+  // null = empty, true = filled, 'void' = no-stitch
+}
+
+function resizeGrid() {
+  const cols = clamp(+v('gcols') || 20, 2, 100);
+  const rows = clamp(+v('grows') || 20, 1, 80);
+  const og = S.grid, oc = S.cols, or = S.rows;
+  S.cols = cols; S.rows = rows;
+  S.grid = Array.from({ length: rows }, (_, r) =>
+    Array.from({ length: cols }, (_, c) => (r < or && c < oc) ? og[r][c] : null)
+  );
+  renderPatternGrid();
+}
+
+function clearGrid() {
+  if (!confirm('Clear the entire pattern?')) return;
+  S.grid = Array.from({ length: S.rows }, () => new Array(S.cols).fill(null));
+  renderPatternGrid();
+  showToast('Grid cleared');
+}
+
+/* ── Pattern grid ── */
+function renderPatternGrid() {
+  const t = document.getElementById('pat-grid');
+  let h = '<tr><td class="rn"></td>';
+  for (let c = 0; c < S.cols; c++)
+    h += `<td class="cn"><span>${c + 1}</span></td>`;
+  h += '</tr>';
+  for (let r = S.rows - 1; r >= 0; r--) {
+    h += `<tr><td class="rn"><span>${r + 1}</span></td>`;
+    for (let c = 0; c < S.cols; c++) {
+      const cell = S.grid[r][c];
+      let cls = 'gc';
+      if (cell === true) cls += ' filled';
+      else if (cell === 'void') cls += ' void';
+      h += `<td class="${cls}" data-r="${r}" data-c="${c}"></td>`;
+    }
+    h += '</tr>';
+  }
+  t.innerHTML = h;
+  bindPattern(t);
+}
+
+function bindPattern(t) {
+  t.onmousedown = e => {
+    isDown = true;
+    const td = e.target.closest('.gc[data-r]');
+    if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
+  };
+  t.onmousemove = e => {
+    if (!isDown) return;
+    const td = e.target.closest('.gc[data-r]');
+    if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
+  };
+  t.ontouchstart = e => { e.preventDefault(); isDown = true; ptTouch(e.touches[0]); };
+  t.ontouchmove  = e => { e.preventDefault(); if (isDown) ptTouch(e.touches[0]); };
+}
+
+function ptTouch(touch) {
+  const td = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('#pat-grid .gc[data-r]');
+  if (td) paintCell(+td.dataset.r, +td.dataset.c, td);
+}
+
+function paintCell(r, c, td) {
+  const t = S.tool;
+  if (t === 'erase') {
+    S.grid[r][c] = null;
+    td.classList.remove('filled', 'void');
+  } else if (t === 'fill') {
+    S.grid[r][c] = true;
+    td.classList.add('filled');
+    td.classList.remove('void');
+  } else if (t === 'void') {
+    S.grid[r][c] = 'void';
+    td.classList.add('void');
+    td.classList.remove('filled');
+  }
+}
+
+/* ── Crochet grid ── */
+// Row 0 (displayed as row 1) → left-to-right. Row 1 → right-to-left. Alternates.
+function rowDir(r) { return r % 2 === 0 ? 'ltr' : 'rtl'; }
+
+// Arrow SVG pointing in the reading direction
+function arrowSvg(dir) {
+  const d = dir === 'ltr'
+    ? 'M3,8 L13,8 M9,4.5 L13,8 L9,11.5'
+    : 'M13,8 L3,8 M7,4.5 L3,8 L7,11.5';
+  return `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto">
+    <path d="${d}" stroke="#34C759" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function renderCrochetGrid() {
+  const t = document.getElementById('cro-grid');
+  let h = '<tr><td class="rn"></td>';
+  for (let c = 0; c < S.cols; c++)
+    h += `<td class="cn"><span>${c + 1}</span></td>`;
+  h += '</tr>';
+
+  for (let r = S.rows - 1; r >= 0; r--) {
+    h += `<tr><td class="rn"><span>${r + 1}</span></td>`;
+    for (let c = 0; c < S.cols; c++) {
+      const key = `${r},${c}`;
+      const cell = S.grid[r][c];
+      let cls = 'gc';
+      if (r === S.crRow)    cls += ' cro-cur';
+      else if (r < S.crRow) cls += ' cro-done';
+      else                  cls += ' cro-fut';
+      if (cell === true)    cls += ' filled';
+      if (cell === 'void')  cls += ' void';
+      const isChk = S.checked.has(key);
+      const inner = (isChk && cell !== 'void') ? arrowSvg(rowDir(r)) : '';
+      h += `<td class="${cls}" data-r="${r}" data-c="${c}">${inner}</td>`;
+    }
+    h += '</tr>';
+  }
+  t.innerHTML = h;
+  bindCrochet(t);
+  updateCrochetUI();
+}
+
+function bindCrochet(t) {
+  t.onmousedown = e => {
+    isDown = true;
+    const td = e.target.closest('.gc[data-r]');
+    if (!td) return;
+    const r = +td.dataset.r, c = +td.dataset.c;
+    // Clicking any non-future row navigates to it
+    if (r > S.crRow) return; // future rows are pointer-events:none anyway
+    if (r !== S.crRow) {
+      S.crRow = r;
+      renderCrochetGrid();
+      return;
+    }
+    dragAction = S.checked.has(`${r},${c}`) ? 'uncheck' : 'check';
+    applyCheck(r, c, td);
+  };
+  t.onmousemove = e => {
+    if (!isDown || !dragAction) return;
+    const td = e.target.closest('.gc[data-r]');
+    if (!td) return;
+    const r = +td.dataset.r, c = +td.dataset.c;
+    if (r !== S.crRow) return;
+    applyCheck(r, c, td);
+  };
+  t.ontouchstart = e => {
+    e.preventDefault(); isDown = true;
+    const td = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('#cro-grid .gc[data-r]');
+    if (!td) return;
+    const r = +td.dataset.r, c = +td.dataset.c;
+    if (r > S.crRow) return;
+    if (r !== S.crRow) { S.crRow = r; renderCrochetGrid(); return; }
+    dragAction = S.checked.has(`${r},${c}`) ? 'uncheck' : 'check';
+    applyCheck(r, c, td);
+  };
+  t.ontouchmove = e => {
+    e.preventDefault();
+    if (!isDown || !dragAction) return;
+    const td = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('#cro-grid .gc[data-r]');
+    if (!td) return;
+    const r = +td.dataset.r, c = +td.dataset.c;
+    if (r !== S.crRow) return;
+    applyCheck(r, c, td);
+  };
+}
+
+function applyCheck(r, c, td) {
+  const key = `${r},${c}`;
+  if (S.grid[r][c] === 'void') return; // skip no-stitch cells
+  if (dragAction === 'check' && !S.checked.has(key)) {
+    S.checked.add(key);
+    td.innerHTML = arrowSvg(rowDir(r));
+    updateProgress();
+    autoAdvanceCheck();
+  } else if (dragAction === 'uncheck' && S.checked.has(key)) {
+    S.checked.delete(key);
+    td.innerHTML = '';
+    updateProgress();
+  }
+}
+
+// Auto-advance: only count non-void cells
+function autoAdvanceCheck() {
+  const nonVoid = Array.from({ length: S.cols }, (_, c) => S.grid[S.crRow][c] !== 'void');
+  const allChecked = nonVoid.every((ok, c) => !ok || S.checked.has(`${S.crRow},${c}`));
+  if (allChecked && S.crRow < S.rows - 1) {
+    setTimeout(() => { S.crRow++; renderCrochetGrid(); showToast(`Row ${S.crRow + 1} ↑`); }, 280);
+  }
+}
+
+function updateCrochetUI() {
+  document.getElementById('cur-num').textContent = S.crRow + 1;
+  document.getElementById('row-tot').textContent = ` / ${S.rows}`;
+  updateProgress();
+}
+
+function updateProgress() {
+  let done = S.crRow * S.cols;
+  for (const k of S.checked) if (+k.split(',')[0] === S.crRow) done++;
+  const pct = S.rows * S.cols > 0 ? Math.round(done / (S.rows * S.cols) * 100) : 0;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-lbl').textContent = pct + '%';
+}
+
+function prevRow() { if (S.crRow > 0) { S.crRow--; renderCrochetGrid(); } }
+function nextRow() { if (S.crRow < S.rows - 1) { S.crRow++; renderCrochetGrid(); } }
+function resetProgress() { S.crRow = 0; S.checked.clear(); renderCrochetGrid(); showToast('Progress reset'); }
+
+/* ── Tool ── */
+function setTool(id) {
+  S.tool = id;
+  document.getElementById('btn-fill').classList.toggle('active', id === 'fill');
+  document.getElementById('btn-erase').classList.toggle('active', id === 'erase');
+  document.getElementById('btn-void').classList.toggle('active', id === 'void');
+}
+
+/* ── Settings ── */
+function calcSettings() {
+  const yw  = v('yw');
+  const gst = +v('gst') || 16;
+  const grw = +v('grw') || 18;
+  const pw  = +v('pw')  || 20;
+  const ph  = +v('ph')  || 20;
+  const cols = Math.round(gst / 10 * pw);
+  const rows = Math.round(grw / 10 * ph);
+  document.getElementById('info-proj').innerHTML =
+    `<b>Recommended hook for ${YARN[yw].n}</b>: ${YARN[yw].h} mm &nbsp;·&nbsp; For <b>${pw} × ${ph} cm</b> your grid will be <b>${cols} stitches × ${rows} rows</b> &nbsp;·&nbsp; 1 stitch ≈ ${(10/gst).toFixed(2)} cm`;
+}
+
+function applyFromSettings() {
+  const gst  = +v('gst') || 16;
+  const grw  = +v('grw') || 18;
+  const pw   = +v('pw')  || 20;
+  const ph   = +v('ph')  || 20;
+  const cols = clamp(Math.round(gst / 10 * pw), 2, 100);
+  const rows = clamp(Math.round(grw / 10 * ph), 1, 80);
+  set('gcols', cols); set('grows', rows);
+  initGrid(cols, rows);
+  renderPatternGrid();
+  showToast(`Grid ${cols} × ${rows} ready`);
+}
+
+/* ── Navigation ── */
+function switchTab(tab) {
+  ['setup','pattern','crochet'].forEach((t, i) => {
+    document.querySelectorAll('.tab-btn')[i].classList.toggle('active', t === tab);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'crochet') renderCrochetGrid();
+}
+
+/* ── Export PNG ── */
+function exportPNG() {
+  const cell = 28, ml = 28, mt = 22, pad = 18;
+  const W = S.cols * cell + ml + pad * 2;
+  const H = S.rows * cell + mt + pad * 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = W * 2; canvas.height = H * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+  const ox = pad + ml, oy = pad + mt;
+  for (let r = 0; r < S.rows; r++) {
+    const vr = S.rows - 1 - r;
+    const y = oy + vr * cell;
+    for (let c = 0; c < S.cols; c++) {
+      const x = ox + c * cell;
+      if (S.grid[r][c] === true) {
+        ctx.fillStyle = '#1D1D1F';
+        ctx.fillRect(x + .5, y + .5, cell - 1, cell - 1);
+      } else if (S.grid[r][c] === 'void') {
+        ctx.fillStyle = '#F0F0F2';
+        ctx.fillRect(x + .5, y + .5, cell - 1, cell - 1);
+        ctx.strokeStyle = '#C8C8CC'; ctx.lineWidth = .8;
+        for (let i = -cell; i < cell * 2; i += 5) {
+          ctx.beginPath();
+          ctx.moveTo(x + i, y); ctx.lineTo(x + i + cell, y + cell);
+          ctx.stroke();
+        }
+      } else {
+        ctx.strokeStyle = '#D1D1D6'; ctx.lineWidth = .5;
+        ctx.strokeRect(x + .25, y + .25, cell - .5, cell - .5);
+      }
+    }
+  }
+  ctx.font = '9px -apple-system, sans-serif'; ctx.fillStyle = '#AEAEB2';
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+  for (let r = 0; r < S.rows; r++)
+    ctx.fillText(r + 1, ox - 4, oy + (S.rows - 1 - r) * cell + cell / 2);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  for (let c = 0; c < S.cols; c++)
+    ctx.fillText(c + 1, ox + c * cell + cell / 2, oy - 5);
+  const link = document.createElement('a');
+  link.download = 'crochet-chart.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('Exported!');
+}
+
+/* ── Utils ── */
+function v(id) { return document.getElementById(id)?.value; }
+function set(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
+function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+document.addEventListener('mouseup',  () => { isDown = false; dragAction = null; });
+document.addEventListener('touchend', () => { isDown = false; dragAction = null; });
+
+initGrid(20, 20);
+renderPatternGrid();
+calcSettings();
+</script>
+</body>
+</html>
